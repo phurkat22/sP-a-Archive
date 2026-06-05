@@ -1,41 +1,792 @@
-sP+a
-Canvas
-Chronology
-People
-0 projects
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sP+a — Studio Archive</title>
+<link href="https://fonts.googleapis.com/css2?family=Century+Gothic:wght@400;700https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swapdisplay=swap" rel="stylesheet">
+<style>
+:root{
+  --mustard:#F5C518;
+  --black:#0f0f0f;
+  --white:#ffffff;
+  --red:#c0392b;
+  --grid:rgba(255,255,255,0.06);
+  --sidebar:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;background:var(--black);color:var(--white)}
+
+/* TOPBAR */
+.topbar{height:50px;background:var(--black);border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;padding:0 0 0 20px;position:relative;z-index:200;flex-shrink:0}
+.studio-name{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-weight:400;font-size:18px;letter-spacing:0.01em;color:var(--white);margin-right:32px;text-transform:none}
+.studio-name span{color:var(--mustard)}
+.mode-nav{display:flex;gap:0;height:100%}
+.mnav{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-weight:400;font-size:13px;letter-spacing:0.04em;text-transform:none;padding:0 20px;border:none;background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;height:100%;border-bottom:2px solid transparent;transition:all 0.15s}
+.mnav:hover{color:var(--white)}
+.mnav.active{color:var(--mustard);border-bottom-color:var(--mustard)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;padding-right:20px}
+.proj-count{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:0.1em}
 
 
-CATEGORY
-EAT
-0
-LIVE
-0
-PRAY
-0
-WORK
-0
-SHOP
-0
-LEARN
-0
-CELEBRATE
-0
+/* LAYOUT */
+.app{display:flex;flex-direction:column;height:100vh}
+.body{display:flex;flex:1;overflow:hidden}
 
-STATUS
-BUILT
-0
-UNBUILT
-0
-ON SITE
-0
-COMPETITION
-0
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:#161616;border-right:1px solid rgba(255,255,255,0.07);overflow-y:auto;padding:20px 0}
+.sb-section{margin-bottom:24px}
+.sb-title{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:8px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.25);padding:0 16px;margin-bottom:10px}
+.sb-item{display:flex;align-items:center;justify-content:space-between;padding:5px 16px;cursor:pointer;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.45);transition:all 0.1s;border-left:2px solid transparent}
+.sb-item:hover{color:var(--white);background:rgba(255,255,255,0.04)}
+.sb-item.on{color:var(--mustard);border-left-color:var(--mustard);background:rgba(245,197,24,0.06)}
+.sb-item.on .sb-count{color:var(--mustard)}
+.sb-count{font-size:10px;color:rgba(255,255,255,0.2);font-weight:400}
+.sb-divider{height:1px;background:rgba(255,255,255,0.06);margin:4px 16px 16px}
+.year-slider-wrap{padding:0 16px}
+.year-labels{display:flex;justify-content:space-between;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:6px}
+input[type=range]{width:100%;-webkit-appearance:none;height:2px;background:rgba(255,255,255,0.15);outline:none;border-radius:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--mustard);border-radius:0;cursor:pointer}
+.search-wrap{padding:0 16px;margin-bottom:8px}
+.search-input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--white);font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:12px;padding:7px 10px;outline:none}
+.search-input::placeholder{color:rgba(255,255,255,0.25)}
+.search-input:focus{border-color:var(--mustard)}
+.clear-btn{width:calc(100% - 32px);margin:0 16px;padding:7px 0;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);cursor:pointer;transition:all 0.1s}
+.clear-btn:hover{border-color:var(--mustard);color:var(--mustard)}
 
-LOCATION
+/* MAIN AREA */
+.main{flex:1;overflow:hidden;position:relative}
+
+/* CANVAS */
+#view-canvas{position:absolute;inset:0;overflow:auto;display:block}
+.canvas-inner{
+  position:relative;width:3800px;height:2800px;
+  background-color:var(--black);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+
+/* PROJECT CARD */
+.pcard{
+  position:absolute;width:210px;
+  border:1px solid var(--mustard);
+  cursor:pointer;user-select:none;
+  display:flex;flex-direction:column;
+  transition:box-shadow 0.15s;
+}
+.pcard:hover{box-shadow:0 0 0 1px var(--mustard)}
+.pcard.dimmed{opacity:0.1;pointer-events:none}
+
+.card-band{
+  background:var(--mustard);
+  padding:10px 12px 9px;
+  flex-shrink:0;
+}
+.card-name{
+  font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;
+  font-weight:900;font-size:17px;
+  color:var(--black);text-transform:uppercase;
+  line-height:1.05;letter-spacing:0.01em;
+}
+.card-sub{
+  font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;
+  font-size:10px;font-weight:400;
+  color:rgba(0,0,0,0.6);
+  margin-top:3px;letter-spacing:0.02em;
+}
+
+.card-img{
+  width:100%;height:160px;
+  background:#1a1a1a;
+  overflow:hidden;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.card-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.card-img .ph{opacity:0.15;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+
+.card-cat{
+  padding:5px 12px 7px;
+  background:var(--black);
+  font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;
+  font-size:8px;font-weight:700;letter-spacing:0.18em;
+  text-transform:uppercase;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.cat-label{color:rgba(255,255,255,0.35)}
+.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sd-built{background:var(--mustard)}
+.sd-unbuilt{background:var(--red)}
+.sd-onsite{background:#e67e22}
+.sd-competition{background:rgba(255,255,255,0.3)}
+
+/* CHRONOLOGY */
+#view-chrono{position:absolute;inset:0;overflow:auto;display:none;padding:0}
+.chrono-inner{
+  min-width:3200px;height:100%;
+  background-color:var(--black);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:40px 40px;
+  padding:60px 60px 40px;
+  position:relative;
+}
+.chrono-axis{position:absolute;top:140px;left:60px;right:60px;height:1px;background:rgba(255,255,255,0.15)}
+.chrono-years{position:absolute;top:60px;left:60px;right:60px;display:flex;justify-content:space-between}
+.chrono-year-mark{display:flex;flex-direction:column;align-items:center;gap:6px}
+.cym-line{width:1px;height:60px;background:rgba(255,255,255,0.1)}
+.cym-label{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;color:rgba(255,255,255,0.3);text-transform:uppercase}
+.chrono-cards{position:absolute;top:160px;left:60px;right:60px}
+.ccard{
+  position:absolute;width:160px;
+  border:1px solid var(--mustard);
+  cursor:pointer;
+  transform:translateX(-50%);
+}
+.ccard .cc-band{background:var(--mustard);padding:7px 9px 6px}
+.ccard .cc-name{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-weight:900;font-size:13px;color:var(--black);text-transform:uppercase;line-height:1.05}
+.ccard .cc-sub{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:9px;color:rgba(0,0,0,0.55);margin-top:2px}
+.ccard .cc-img{width:100%;height:100px;background:#1a1a1a;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+.ccard .cc-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ccard .cc-img .ph{opacity:0.15}
+.ccard .cc-foot{padding:4px 9px 5px;background:var(--black);font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:8px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.3)}
+.chrono-connector{position:absolute;width:1px;background:var(--mustard);opacity:0.4;top:0}
+
+/* PEOPLE */
+#view-people{position:absolute;inset:0;overflow:auto;display:none;padding:40px}
+.people-grid{display:flex;flex-wrap:wrap;gap:20px}
+.person-card{width:160px;cursor:pointer}
+.person-avatar{width:160px;height:160px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:36px;font-weight:900;color:var(--mustard);letter-spacing:0.05em;transition:border-color 0.15s}
+.person-card:hover .person-avatar{border-color:var(--mustard)}
+.person-name{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--white);margin-top:8px;letter-spacing:0.04em}
+.person-role{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px}
+.person-count{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:10px;color:var(--mustard);margin-top:3px;letter-spacing:0.06em}
+
+/* MODAL — project detail */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#161616;width:700px;max-width:96vw;max-height:92vh;overflow-y:auto;border:1px solid rgba(255,255,255,0.1);position:relative;display:flex;flex-direction:column}
+.modal-img{width:100%;height:340px;background:#1a1a1a;position:relative;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.modal-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.modal-img .no-img{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.2)}
+.modal-img-tabs{position:absolute;bottom:0;left:0;right:0;display:flex}
+.mit{flex:1;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:8px 0;text-align:center;background:rgba(0,0,0,0.6);color:rgba(255,255,255,0.4);border:none;cursor:pointer;transition:all 0.1s}
+.mit.on{background:var(--mustard);color:var(--black)}
+.modal-band{background:var(--mustard);padding:14px 24px 12px}
+.modal-name{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:32px;font-weight:900;color:var(--black);text-transform:uppercase;line-height:1;letter-spacing:0.01em}
+.modal-sub{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:12px;color:rgba(0,0,0,0.55);margin-top:4px}
+.modal-body{padding:20px 24px}
+.modal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 20px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:18px}
+.mf-l{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:3px}
+.mf-v{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:14px;font-weight:700;color:var(--white);text-transform:uppercase}
+.sbadge{display:inline-block;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px}
+.sb-b{background:var(--mustard);color:var(--black)}
+.sb-u{background:var(--red);color:#fff}
+.sb-o{background:#e67e22;color:#fff}
+.sb-c{background:rgba(255,255,255,0.15);color:#fff}
+.sec-lbl{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:8px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:8px}
+.themes-wrap,.team-wrap{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.07)}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.ttag{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:10px;padding:3px 9px;border:1px solid rgba(245,197,24,0.3);color:rgba(245,197,24,0.8);font-style:italic;background:rgba(245,197,24,0.05)}
+.tchips{display:flex;flex-wrap:wrap;gap:5px}
+.tchip{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:3px 9px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.1)}
+.drive-btn{display:block;width:100%;padding:13px;text-align:center;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;background:var(--mustard);color:var(--black);border:none;cursor:pointer;text-decoration:none;transition:opacity 0.15s}
+.drive-btn:hover{opacity:0.85}
+.drive-btn.off{opacity:0.25;pointer-events:none}
+.modal-close{position:absolute;top:10px;right:10px;width:28px;height:28px;background:rgba(0,0,0,0.5);border:none;color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;z-index:10;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-weight:900}
+.modal-close:hover{background:var(--red)}
+
+/* PERSON MODAL */
+.pmodal{background:#161616;width:600px;max-width:96vw;max-height:92vh;overflow-y:auto;border:1px solid rgba(255,255,255,0.1);position:relative}
+.pmodal-head{background:var(--mustard);padding:20px 24px}
+.pmodal-initials{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:48px;font-weight:900;color:var(--black);line-height:1}
+.pmodal-name{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:24px;font-weight:700;color:var(--black);text-transform:uppercase;margin-top:4px}
+.pmodal-meta{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:12px;color:rgba(0,0,0,0.55);margin-top:2px}
+.pmodal-body{padding:20px 24px}
+.pmodal-proj-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer}
+.pmodal-proj-row:hover .ppr-name{color:var(--mustard)}
+.ppr-year{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,0.25);width:36px;flex-shrink:0}
+.ppr-name{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;color:var(--white);flex:1;transition:color 0.1s}
+.ppr-cat{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.25)}
+
+/* ADD FORM */
+.form-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:32px 20px;overflow-y:auto}
+.form-overlay.open{display:flex}
+.form-panel{background:#161616;width:580px;max-width:100%;padding:26px;border:1px solid rgba(255,255,255,0.1);border-top:3px solid var(--mustard)}
+.form-title{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:24px;font-weight:900;text-transform:uppercase;color:var(--white);margin-bottom:18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-bottom:14px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg.full{grid-column:span 2}
+.fl{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:8px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.3)}
+.fi,.fs{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:12px;padding:7px 9px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:var(--white);outline:none;width:100%}
+.fi:focus,.fs:focus{border-color:var(--mustard)}
+.fs option{background:#161616}
+.form-btns{display:flex;gap:8px;margin-top:4px}
+.f-save{flex:1;padding:11px;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;background:var(--mustard);color:var(--black);border:none;cursor:pointer}
+.f-cancel{padding:11px 18px;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;background:transparent;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1);cursor:pointer}
+
+/* HAMBURGER */
+.hamburger{background:none;border:none;color:var(--white);font-size:20px;cursor:pointer;padding:0 14px 0 0;line-height:1;flex-shrink:0;display:none}
+
+/* SIDEBAR OVERLAY (mobile) */
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:149;display:none}
+.sidebar-overlay.open{display:block}
+
+@media(max-width:768px){
+  .hamburger{display:block}
+  .sidebar{
+    position:fixed;left:-240px;top:0;bottom:0;z-index:150;
+    width:240px;transition:left 0.25s ease;
+    padding-top:60px;
+  }
+  .sidebar.open{left:0}
+  .mode-nav{position:static!important;transform:none!important}
+  .studio-name-wrap{margin-right:auto}
+  .topbar{padding:0 12px;gap:0}
+  .canvas-inner{width:2400px;height:2000px}
+  .pcard{width:160px}
+  .card-name{font-size:14px}
+  .card-img{height:120px}
+  .ccard{width:130px}
+  .ccard .cc-img{height:80px}
+  .people-grid{gap:12px;padding:20px}
+  .person-avatar{width:120px;height:120px;font-size:28px}
+  .person-card{width:120px}
+  .modal{width:96vw}
+  .modal-img{height:220px}
+  .modal-name{font-size:24px}
+  .pmodal{width:96vw}
+}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+<div class="app">
+  <div class="topbar"><button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Toggle filters">&#9776;</button>
+    <div style="font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:18px;color:#fff;margin-right:32px;letter-spacing:0.01em">s<span style="font-weight:700">P</span><span style="font-weight:400">+</span>a</div>
+    <div class="mode-nav" style="position:absolute;left:50%;transform:translateX(-50%);height:100%">
+      <button class="mnav active" onclick="setMode('canvas',this)">Canvas</button>
+      <button class="mnav" onclick="setMode('chrono',this)">Chronology</button>
+      <button class="mnav" onclick="setMode('people',this)">People</button>
+    </div>
+    <div class="topbar-right">
+      <span class="proj-count" id="proj-count">0 projects</span><span id="sheet-status" style="font-family:'Century Gothic',sans-serif;font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:0.08em;margin-left:8px"></span>
+      
+    </div>
+  </div>
+  <div class="body">
+    <div class="sidebar">
+      <div class="sb-section">
+        <div class="search-wrap">
+          <input class="search-input" type="text" placeholder="Search projects..." oninput="applyFilters()">
+        </div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-title">Category</div>
+        <div class="sb-item" onclick="toggleFilter('cat','Eat',this)"><span>Eat</span><span class="sb-count" id="cnt-Eat">0</span></div>
+        <div class="sb-item" onclick="toggleFilter('cat','Live',this)"><span>Live</span><span class="sb-count" id="cnt-Live">0</span></div>
+        <div class="sb-item" onclick="toggleFilter('cat','Pray',this)"><span>Pray</span><span class="sb-count" id="cnt-Pray">0</span></div>
+        <div class="sb-item" onclick="toggleFilter('cat','Work',this)"><span>Work</span><span class="sb-count" id="cnt-Work">0</span></div>
+        <div class="sb-item" onclick="toggleFilter('cat','Shop',this)"><span>Shop</span><span class="sb-count" id="cnt-Shop">0</span></div>
+        <div class="sb-item" onclick="toggleFilter('cat','Learn',this)"><span>Learn</span><span class="sb-count" id="cnt-Learn">0</span></div>
+        <div class="sb-item" onclick="toggleFilter('cat','Celebrate',this)"><span>Celebrate</span><span class="sb-count" id="cnt-Celebrate">0</span></div>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-section">
+        <div class="sb-title">Status</div>
+        <div class="sb-item" onclick="toggleFilter('status','Built',this)"><span>Built</span><span class="sb-count" id="cnt-Built">0</span></div>
+        <div class="sb-item" onclick="toggleFilter('status','Unbuilt',this)"><span>Unbuilt</span><span class="sb-count" id="cnt-Unbuilt">0</span></div>
+        <div class="sb-item" onclick="toggleFilter('status','On Site',this)"><span>On Site</span><span class="sb-count" id="cnt-OnSite">0</span></div>
+        <div class="sb-item" onclick="toggleFilter('status','Competition',this)"><span>Competition</span><span class="sb-count" id="cnt-Competition">0</span></div>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-section">
+        <div class="sb-title">Location</div>
+        <div id="location-filters"></div>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-section">
+        <div class="sb-title">Year — <span id="year-range-lbl">2008–2025</span></div>
+        <div class="year-slider-wrap">
+          <input type="range" id="year-min" min="2008" max="2025" value="2008" oninput="applyFilters();updateYearLabel()">
+          <input type="range" id="year-max" min="2008" max="2025" value="2025" oninput="applyFilters();updateYearLabel()" style="margin-top:6px">
+        </div>
+      </div>
+      <div class="sb-divider"></div>
+      <button class="clear-btn" onclick="clearFilters()">Clear all filters</button>
+    </div>
+    <div class="main">
+      <div id="view-canvas"><div class="canvas-inner" id="canvas"></div></div>
+      <div id="view-chrono"><div class="chrono-inner" id="chrono-inner"></div></div>
+      <div id="view-people"><div class="people-grid" id="people-grid"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECT MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-img" id="modal-img">
+      <div class="no-img">No image</div>
+      <div class="modal-img-tabs" id="modal-img-tabs"></div>
+    </div>
+    <div class="modal-band">
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-sub" id="modal-sub"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid" id="modal-grid"></div>
+      <div id="themes-sec" style="display:none" class="themes-wrap">
+        <div class="sec-lbl">Thematic tags</div>
+        <div class="tags" id="modal-themes"></div>
+      </div>
+      <div id="team-sec" style="display:none" class="team-wrap">
+        <div class="sec-lbl">Team</div>
+        <div class="tchips" id="modal-team"></div>
+      </div>
+      <a class="drive-btn off" id="modal-drive" href="#" target="_blank">View full project archive ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- PERSON MODAL -->
+<div class="modal-overlay" id="person-overlay" onclick="if(event.target===this)closePersonModal()">
+  <div class="pmodal">
+    <button class="modal-close" onclick="closePersonModal()">✕</button>
+    <div class="pmodal-head">
+      <div class="pmodal-initials" id="pm-initials"></div>
+      <div class="pmodal-name" id="pm-name"></div>
+      <div class="pmodal-meta" id="pm-meta"></div>
+    </div>
+    <div class="pmodal-body" id="pm-body"></div>
+  </div>
+</div>
+
+<!-- ADD FORM -->
+<div class="form-overlay" id="form-overlay">
+  <div class="form-panel">
+    <div class="form-title">Add project</div>
+    <div class="form-grid">
+      <div class="fg"><div class="fl">Project code</div><input class="fi" id="f-code" placeholder="SP—001"></div>
+      <div class="fg"><div class="fl">Year</div><input class="fi" id="f-year" placeholder="2018" type="number"></div>
+      <div class="fg full"><div class="fl">Project name</div><input class="fi" id="f-name" placeholder="Maya Somaiya Library"></div>
+      <div class="fg"><div class="fl">Category</div>
+        <select class="fs" id="f-cat"><option value="">Select</option><option>Eat</option><option>Live</option><option>Pray</option><option>Work</option><option>Shop</option><option>Learn</option><option>Celebrate</option></select>
+      </div>
+      <div class="fg"><div class="fl">Status</div>
+        <select class="fs" id="f-status"><option value="">Select</option><option>Built</option><option>Unbuilt</option><option>On Site</option><option>Competition</option></select>
+      </div>
+      <div class="fg"><div class="fl">City</div><input class="fi" id="f-city" placeholder="Kopargaon"></div>
+      <div class="fg"><div class="fl">State / Country</div><input class="fi" id="f-loc" placeholder="Maharashtra"></div>
+      <div class="fg"><div class="fl">Area (sqm)</div><input class="fi" id="f-area" placeholder="550" type="number"></div>
+      <div class="fg"><div class="fl">Client type</div>
+        <select class="fs" id="f-client"><option value="">Select</option><option>Private Individual</option><option>Private Trust / NGO</option><option>Corporate</option><option>Government</option><option>Developer</option><option>Academic Institution</option></select>
+      </div>
+      <div class="fg full"><div class="fl">Client name</div><input class="fi" id="f-clientname" placeholder="Somaiya Vidyavihar"></div>
+      <div class="fg full"><div class="fl">Team (comma separated)</div><input class="fi" id="f-team" placeholder="Sameep Padora, Aparna Dhareshwar, Vami Koticha"></div>
+      <div class="fg full"><div class="fl">Thematic tags (comma separated)</div><input class="fi" id="f-themes" placeholder="outdoor room, corbelling, weight"></div>
+      <div class="fg full"><div class="fl">Feature image — Google Drive direct share link</div><input class="fi" id="f-img" placeholder="https://drive.google.com/file/d/.../view"></div>
+      <div class="fg full"><div class="fl">Drive folder link</div><input class="fi" id="f-drive" placeholder="https://drive.google.com/drive/folders/..."></div>
+    </div>
+    <div class="form-btns">
+      <button class="f-cancel" onclick="closeForm()">Cancel</button>
+      <button class="f-save" onclick="saveProject()">Save to canvas</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let projects=[];
+window.peopleData=[];
+
+let filters={cat:new Set(),status:new Set(),loc:new Set()};
+const CW=210,GAP=24,COLS=9,SX=40,SY=40;
+
+function gdrive(url){
+  if(!url)return null;
+  const m=url.match(/\/d\/([^/]+)/);
+  if(m)return`https://lh3.googleusercontent.com/d/${m[1]}`;
+  return url;
+}
+
+function initials(name){return name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}
+
+function statusClass(s){return{Built:'sd-built',Unbuilt:'sd-unbuilt','On Site':'sd-onsite',Competition:'sd-competition'}[s]||'sd-competition'}
+function badgeClass(s){return{Built:'sb-b',Unbuilt:'sb-u','On Site':'sb-o',Competition:'sb-c'}[s]||'sb-c'}
+
+function setMode(mode,btn){
+  document.querySelectorAll('.mnav').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['canvas','chrono','people'].forEach(m=>{
+    document.getElementById('view-'+m).style.display=m===mode?'block':'none';
+  });
+  if(mode==='chrono')renderChrono();
+  if(mode==='people')renderPeople();
+}
+
+function toggleFilter(cat,val,el){
+  const s=filters[cat];
+  if(s.has(val)){s.delete(val);el.classList.remove('on');}
+  else{s.add(val);el.classList.add('on');}
+  applyFilters();
+}
+
+function updateYearLabel(){
+  const mn=+document.getElementById('year-min').value;
+  const mx=+document.getElementById('year-max').value;
+  document.getElementById('year-range-lbl').textContent=mn+'–'+mx;
+}
+
+function applyFilters(){
+  const q=document.querySelector('.search-input').value.toLowerCase();
+  const mn=+document.getElementById('year-min').value;
+  const mx=+document.getElementById('year-max').value;
+  document.querySelectorAll('.pcard').forEach(card=>{
+    const p=projects.find(x=>x.id===card.dataset.id);
+    if(!p){card.classList.add('dimmed');return;}
+    const yr=+p.year||0;
+    const catOk=filters.cat.size===0||filters.cat.has(p.cat);
+    const statOk=filters.status.size===0||filters.status.has(p.status);
+    const locOk=filters.loc.size===0||filters.loc.has(p.loc);
+    const yrOk=!p.year||(yr>=mn&&yr<=mx);
+    const qOk=!q||(p.name+p.code+p.city+p.loc).toLowerCase().includes(q);
+    card.classList.toggle('dimmed',!(catOk&&statOk&&locOk&&yrOk&&qOk));
+  });
+}
+
+function clearFilters(){
+  ['cat','status','loc'].forEach(k=>filters[k].clear());
+  document.querySelectorAll('.sb-item.on').forEach(el=>el.classList.remove('on'));
+  document.getElementById('year-min').value=2008;
+  document.getElementById('year-max').value=2025;
+  updateYearLabel();
+  document.querySelector('.search-input').value='';
+  applyFilters();
+}
+
+function updateCounts(){
+  const cats=['Eat','Live','Pray','Work','Shop','Learn','Celebrate'];
+  cats.forEach(c=>{
+    const el=document.getElementById('cnt-'+c);
+    if(el)el.textContent=projects.filter(p=>p.cat===c).length;
+  });
+  ['Built','Unbuilt','On Site','Competition'].forEach(s=>{
+    const id='cnt-'+s.replace(' ','');
+    const el=document.getElementById(id);
+    if(el)el.textContent=projects.filter(p=>p.status===s).length;
+  });
+  const locs=[...new Set(projects.map(p=>p.loc).filter(Boolean))].sort();
+  const lf=document.getElementById('location-filters');
+  lf.innerHTML=locs.map(l=>`<div class="sb-item" onclick="toggleFilter('loc','${l}',this)"><span>${l}</span><span class="sb-count">${projects.filter(p=>p.loc===l).length}</span></div>`).join('');
+  document.getElementById('proj-count').textContent=projects.length+' project'+(projects.length!==1?'s':'');
+}
+
+function getPos(idx){
+  return{x:SX+(idx%COLS)*(CW+GAP),y:SY+Math.floor(idx/COLS)*(CW+GAP+60)};
+}
+
+function renderCard(p){
+  const card=document.createElement('div');
+  card.className='pcard';card.dataset.id=p.id;
+  card.style.left=p.x+'px';card.style.top=p.y+'px';
+  const imgSrc=gdrive(p.img);
+  card.innerHTML=`
+    <div class="card-band">
+      <div class="card-name">${p.name}</div>
+      <div class="card-sub">${p.city||p.loc||''}${p.year?' | '+p.year:''}</div>
+    </div>
+    <div class="card-img" id="ci-${p.id}">
+      ${imgSrc?`<img src="${imgSrc}" alt="">`:`<div class="ph"><svg width="40" height="30" viewBox="0 0 40 30" fill="none"><rect x="1" y="6" width="38" height="22" stroke="white" stroke-width="1"/><polyline points="1,6 20,1 39,6" stroke="white" stroke-width="1"/></svg></div>`}
+    </div>
+    <div class="card-cat">
+      <span class="cat-label">${p.cat||''}</span>
+      <span class="status-dot ${statusClass(p.status)}"></span>
+    </div>`;
+  makeDraggable(card,p);
+  document.getElementById('canvas').appendChild(card);
+}
+
+function makeDraggable(el,p){
+  let sx,sy,moved=false,dragging=false;
+  const onStart=e=>{
+    if(e.target.closest('.card-cat'))return;
+    dragging=true;moved=false;
+    const pt=e.touches?e.touches[0]:e;
+    sx=pt.clientX-el.offsetLeft;sy=pt.clientY-el.offsetTop;
+    el.style.zIndex=999;e.preventDefault();
+  };
+  const onMove=e=>{
+    if(!dragging)return;
+    const pt=e.touches?e.touches[0]:e;
+    const nx=pt.clientX-sx,ny=pt.clientY-sy;
+    if(Math.abs(nx-el.offsetLeft)>5||Math.abs(ny-el.offsetTop)>5)moved=true;
+    el.style.left=Math.max(0,nx)+'px';el.style.top=Math.max(0,ny)+'px';
+    p.x=Math.max(0,nx);p.y=Math.max(0,ny);e.preventDefault();
+  };
+  const onEnd=()=>{
+    if(!dragging)return;dragging=false;el.style.zIndex='';
+    if(!moved)openModal(p.id);
+  };
+  el.addEventListener('mousedown',onStart,{passive:false});
+  el.addEventListener('touchstart',onStart,{passive:false});
+  document.addEventListener('mousemove',onMove,{passive:false});
+  document.addEventListener('touchmove',onMove,{passive:false});
+  document.addEventListener('mouseup',onEnd);
+  document.addEventListener('touchend',onEnd);
+}
+
+function openModal(id){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  document.getElementById('modal-name').textContent=p.name;
+  document.getElementById('modal-sub').textContent=(p.city||'')+(p.city&&p.loc?' · ':'')+( p.loc||'')+(p.year?' | '+p.year:'');
+  const imgArea=document.getElementById('modal-img');
+  imgArea.querySelectorAll('img').forEach(i=>i.remove());
+  const noImg=imgArea.querySelector('.no-img');
+  const imgs=[p.img,p.img2,p.img3].filter(Boolean);
+  if(imgs.length){
+    if(noImg)noImg.style.display='none';
+    const img=document.createElement('img');img.src=gdrive(imgs[0]);imgArea.insertBefore(img,imgArea.firstChild);
+    const tabs=document.getElementById('modal-img-tabs');
+    tabs.innerHTML=imgs.map((src,i)=>`<button class="mit${i===0?' on':''}" onclick="switchModalImg('${id}',${i})">${i+1}</button>`).join('');
+  } else {if(noImg)noImg.style.display='';}
+  const sbMap={Built:'sb-b',Unbuilt:'sb-u','On Site':'sb-o',Competition:'sb-c'};
+  document.getElementById('modal-grid').innerHTML=[
+    ['Category',p.cat],['Year',p.year],['Location',(p.city?p.city+', ':'')+p.loc],
+    ['Area',p.area?p.area+' sqm':'—'],['Client',p.clientName||p.clientType||'—'],
+    ['Status',p.status?`<span class="sbadge ${badgeClass(p.status)}">${p.status}</span>`:'—']
+  ].map(([l,v])=>`<div><div class="mf-l">${l}</div><div class="mf-v">${v||'—'}</div></div>`).join('');
+  const ts=document.getElementById('themes-sec');
+  if(p.themes.length){ts.style.display='';document.getElementById('modal-themes').innerHTML=p.themes.map(t=>`<span class="ttag">${t}</span>`).join('');}
+  else ts.style.display='none';
+  const te=document.getElementById('team-sec');
+  if(p.team.length){te.style.display='';document.getElementById('modal-team').innerHTML=p.team.map(t=>`<span class="tchip">${t}</span>`).join('');}
+  else te.style.display='none';
+  const dl=document.getElementById('modal-drive');
+  if(p.drive){dl.href=p.drive;dl.classList.remove('off');}else{dl.href='#';dl.classList.add('off');}
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function switchModalImg(id,idx){
+  const p=projects.find(x=>x.id===id);if(!p)return;
+  const imgs=[p.img,p.img2,p.img3].filter(Boolean);
+  const imgArea=document.getElementById('modal-img');
+  imgArea.querySelectorAll('img').forEach(i=>i.remove());
+  document.querySelectorAll('.mit').forEach((b,i)=>b.classList.toggle('on',i===idx));
+  if(imgs[idx]){const img=document.createElement('img');img.src=gdrive(imgs[idx]);imgArea.insertBefore(img,imgArea.firstChild);}
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+
+function renderChrono(){
+  const ci=document.getElementById('chrono-inner');
+  ci.innerHTML='';
+  const YEARS=[];for(let y=2008;y<=2025;y++)YEARS.push(y);
+  const W=3800-120,perYear=W/17;
+  // axis
+  const axis=document.createElement('div');axis.className='chrono-axis';ci.appendChild(axis);
+  // year marks
+  const yw=document.createElement('div');yw.className='chrono-years';
+  YEARS.forEach(y=>{
+    const m=document.createElement('div');m.className='chrono-year-mark';
+    m.innerHTML=`<div class="cym-line"></div><div class="cym-label">${y}</div>`;
+    yw.appendChild(m);
+  });
+  ci.appendChild(yw);
+  // cards — stack by year
+  const byYear={};
+  projects.forEach(p=>{if(p.year){const y=+p.year;if(!byYear[y])byYear[y]=[];byYear[y].push(p);}});
+  Object.entries(byYear).forEach(([yr,ps])=>{
+    const xPct=(+yr-2008)/17;
+    const xPx=60+xPct*W;
+    ps.forEach((p,i)=>{
+      const card=document.createElement('div');
+      card.className='ccard';
+      card.style.left=xPx+'px';
+      card.style.top=(i*180+20)+'px';
+      const imgSrc=gdrive(p.img);
+      card.innerHTML=`
+        <div class="cc-band"><div class="cc-name">${p.name}</div><div class="cc-sub">${p.city||p.loc||''}</div></div>
+        <div class="cc-img">${imgSrc?`<img src="${imgSrc}" alt="">`:`<div class="ph"><svg width="30" height="22" viewBox="0 0 30 22" fill="none"><rect x="1" y="4" width="28" height="16" stroke="white" stroke-width="1"/><polyline points="1,4 15,1 29,4" stroke="white" stroke-width="1"/></svg></div>`}</div>
+        <div class="cc-foot">${p.cat||''} · ${p.status||''}</div>`;
+      card.onclick=()=>openModal(p.id);
+      ci.appendChild(card);
+      // connector line to axis
+      const line=document.createElement('div');
+      line.className='chrono-connector';
+      line.style.left=xPx+'px';
+      line.style.top='80px';
+      line.style.height=(i*180+20-80)+'px';
+      if(i===0)ci.appendChild(line);
+    });
+  });
+}
+
+function renderPeople(){
+  const pg=document.getElementById('people-grid');
+  pg.innerHTML='';
+  const teamMap={};
+  projects.forEach(p=>{
+    p.team.forEach(t=>{
+      if(!t)return;
+      if(!teamMap[t])teamMap[t]={name:t,projects:[]};
+      teamMap[t].projects.push(p);
+    });
+  });
+  Object.values(teamMap).sort((a,b)=>b.projects.length-a.projects.length).forEach(person=>{
+    const years=person.projects.map(p=>+p.year).filter(Boolean);
+    const div=document.createElement('div');
+    div.className='person-card';
+    const personData=(window.peopleData||[]).find(p=>p.name.toLowerCase()===person.name.toLowerCase());
+    const photoSrc=personData&&personData.photo?gdrive(personData.photo):null;
+    const avatarHTML=photoSrc
+      ?`<div class="person-avatar" style="padding:0;overflow:hidden"><img src="${photoSrc}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentElement.innerHTML='${initials(person.name)}'"></div>`
+      :`<div class="person-avatar">${initials(person.name)}</div>`;
+    div.innerHTML=`
+      ${avatarHTML}
+      <div class="person-name">${person.name}</div>
+      <div class="person-role">${years.length?Math.min(...years)+'–'+Math.max(...years):''}</div>
+      <div class="person-count">${person.projects.length} project${person.projects.length!==1?'s':''}</div>`;
+    div.onclick=()=>openPersonModal(person);
+    pg.appendChild(div);
+  });
+}
+
+function openPersonModal(person){
+  const years=person.projects.map(p=>+p.year).filter(Boolean);
+  document.getElementById('pm-initials').textContent=initials(person.name);
+  document.getElementById('pm-name').textContent=person.name;
+  document.getElementById('pm-meta').textContent=`${person.projects.length} projects${years.length?' · '+Math.min(...years)+'–'+Math.max(...years):''}`;
+  document.getElementById('pm-body').innerHTML=person.projects.sort((a,b)=>(+b.year||0)-(+a.year||0)).map(p=>`
+    <div class="pmodal-proj-row" onclick="closePersonModal();openModal('${p.id}')">
+      <div class="ppr-year">${p.year||'—'}</div>
+      <div class="ppr-name">${p.name}</div>
+      <div class="ppr-cat">${p.cat||''}</div>
+    </div>`).join('');
+  document.getElementById('person-overlay').classList.add('open');
+}
+function closePersonModal(){document.getElementById('person-overlay').classList.remove('open');}
+
+function openForm(){document.getElementById('form-overlay').classList.add('open');}
+function closeForm(){document.getElementById('form-overlay').classList.remove('open');}
+
+function saveProject(){
+  const name=document.getElementById('f-name').value.trim();
+  const code=document.getElementById('f-code').value.trim();
+  if(!name){alert('Project name required.');return;}
+  const p={
+    id:Date.now().toString()+Math.random(),
+    code,name,
+    year:document.getElementById('f-year').value||'',
+    cat:document.getElementById('f-cat').value||'',
+    status:document.getElementById('f-status').value||'',
+    city:document.getElementById('f-city').value||'',
+    loc:document.getElementById('f-loc').value||'',
+    area:document.getElementById('f-area').value||'',
+    clientType:document.getElementById('f-client').value||'',
+    clientName:document.getElementById('f-clientname').value||'',
+    team:document.getElementById('f-team').value.split(',').map(s=>s.trim()).filter(Boolean),
+    themes:document.getElementById('f-themes').value.split(',').map(s=>s.trim()).filter(Boolean),
+    img:document.getElementById('f-img').value.trim(),
+    img2:'',img3:'',
+    drive:document.getElementById('f-drive').value.trim(),
+    x:null,y:null
+  };
+  const pos=getPos(projects.length);p.x=pos.x;p.y=pos.y;
+  projects.push(p);renderCard(p);updateCounts();closeForm();
+  ['f-code','f-name','f-year','f-city','f-loc','f-area','f-clientname','f-team','f-themes','f-img','f-drive'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-cat').value='';document.getElementById('f-status').value='';document.getElementById('f-client').value='';
+}
+
+// SHEET CONNECTION
+const SHEET_ID='1QB0ih3EZasiLzCCPQWhkVMisMlg_nca_w132ZIv9jOs';
+
+async function loadFromSheet(){
+  try{
+    const base=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+    const projRes=await fetch(base+'&sheet=Projects');
+    if(!projRes.ok)throw new Error('not public');
+    const projText=await projRes.text();
+    const projRows=parseCSV(projText);
+    if(projRows.length<2)throw new Error('no data');
+    projects=[];
+    document.getElementById('canvas').innerHTML='';
+    const headers=projRows[0].map(h=>h.replace(/"/g,'').trim().toLowerCase().replace(/[^a-z0-9]/g,''));
+    projRows.slice(1).forEach((row,i)=>{
+      const get=(name)=>{const idx=headers.indexOf(name);return idx>=0?(row[idx]||'').replace(/^"|"$/g,'').trim():'';};
+      const p={
+        id:'s'+i,code:get('code'),name:get('name'),cat:get('category'),
+        status:get('status'),year:get('year'),city:get('city'),loc:get('state'),
+        area:get('areasqm')||get('area'),clientName:get('clientname'),
+        clientType:get('clienttype'),
+        team:get('team').split(',').map(s=>s.trim()).filter(Boolean),
+        themes:get('themes').split(',').map(s=>s.trim()).filter(Boolean),
+        img:get('featureimage'),img2:get('image2'),img3:get('image3'),
+        drive:get('drivefolder'),x:null,y:null
+      };
+      if(!p.name)return;
+      const pos=getPos(projects.length);p.x=pos.x;p.y=pos.y;
+      projects.push(p);renderCard(p);
+    });
+    try{
+      const pr=await fetch(base+'&sheet=People');
+      if(pr.ok){const pt=await pr.text();const rows=parseCSV(pt);
+        window.peopleData=rows.slice(1).map(r=>({name:(r[0]||'').replace(/"/g,'').trim(),role:(r[1]||'').replace(/"/g,'').trim(),photo:(r[2]||'').replace(/"/g,'').trim()})).filter(p=>p.name);}
+    }catch(e){}
+    updateCounts();
+    const st=document.getElementById('sheet-status');
+    if(st){st.textContent='● live from sheets';st.style.color='rgba(245,197,24,0.5)';}
+  }catch(e){
+    console.warn('Sheet not accessible, loading demo:',e);
+    loadDemo();
+  }
+}
+
+function parseCSV(text){
+  const rows=[];const lines=text.split('\n');
+  for(const line of lines){
+    if(!line.trim())continue;
+    const row=[];let cur='';let inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'&&(i===0||line[i-1]===',')){inQ=true;}
+      else if(ch==='"'&&inQ&&(i===line.length-1||line[i+1]===',')){inQ=false;}
+      else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
+      else cur+=ch;
+    }
+    row.push(cur.trim());rows.push(row);
+  }
+  return rows;
+}
+
+function loadDemo(){
+  const st=document.getElementById('sheet-status');
+  if(st){st.textContent='● demo data';st.style.color='rgba(255,150,100,0.5)';}
+  const DEMO=[
+    {code:'SP—001',name:'Maya Somaiya Library',year:'2018',cat:'Learn',status:'Built',city:'Kopargaon',loc:'Maharashtra',area:'550',clientType:'Academic Institution',clientName:'Somaiya Vidyavihar',team:['Sameep Padora','Aparna Dhareshwar','Vami Koticha'],themes:['corbelling','outdoor room','weight'],img:'',img2:'',img3:'',drive:''},
+    {code:'SP—002',name:'Aatam Hostel',year:'2015',cat:'Live',status:'Built',city:'Kota',loc:'Rajasthan',area:'1200',clientType:'Private Individual',clientName:'',team:['Sameep Padora','Vami Koticha'],themes:['courtyard','collective space','weight'],img:'',img2:'',img3:'',drive:''},
+    {code:'SP—003',name:'Hampi Art Labs',year:'2024',cat:'Work',status:'Built',city:'Vijayanagar',loc:'Karnataka',area:'5000',clientType:'Corporate',clientName:'JSW Foundation',team:['Sameep Padora','Aparna Dhareshwar','Vami Koticha'],themes:['object','section','landscape'],img:'',img2:'',img3:'',drive:''},
+  ];
+  DEMO.forEach((d,i)=>{d.id='d'+i;const pos=getPos(i);d.x=pos.x;d.y=pos.y;projects.push(d);renderCard(d);});
+  updateCounts();
+}
 
 
-YEAR — 2008–2025
+function toggleSidebar(){
+  const sb=document.querySelector('.sidebar');
+  const ov=document.getElementById('sidebar-overlay');
+  const hb=document.getElementById('hamburger');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+  hb.innerHTML=sb.classList.contains('open')?'&#10005;':'&#9776;';
+}
+// Close sidebar on filter select (mobile)
+document.querySelectorAll('.sb-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    if(window.innerWidth<=768)toggleSidebar();
+  });
+});
 
-
-CLEAR ALL FILTERS
-
+// Boot
+loadFromSheet();
+</script>
+</body>
+</html>
