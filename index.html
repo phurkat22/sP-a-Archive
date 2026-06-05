@@ -197,10 +197,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 
 /* PERSON MODAL */
 .pmodal{background:#161616;width:600px;max-width:96vw;max-height:92vh;overflow-y:auto;border:1px solid rgba(255,255,255,0.1);position:relative}
-.pmodal-head{background:var(--mustard);padding:20px 24px}
-.pmodal-initials{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:48px;font-weight:900;color:var(--black);line-height:1}
-.pmodal-name{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:24px;font-weight:700;color:var(--black);text-transform:uppercase;margin-top:4px}
-.pmodal-meta{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:12px;color:rgba(0,0,0,0.55);margin-top:2px}
+.pmodal-head{background:var(--mustard);padding:0;display:flex;align-items:stretch;min-height:140px}
+.pmodal-photo{width:140px;flex-shrink:0;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15)}
+.pmodal-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.pmodal-photo-initials{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:42px;font-weight:900;color:var(--black)}
+.pmodal-info{padding:20px 20px;display:flex;flex-direction:column;justify-content:center}
+.pmodal-initials{display:none}
+.pmodal-name{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:22px;font-weight:700;color:var(--black);text-transform:uppercase;line-height:1.1}
+.pmodal-meta{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:12px;color:rgba(0,0,0,0.55);margin-top:6px}
 .pmodal-body{padding:20px 24px}
 .pmodal-proj-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer}
 .pmodal-proj-row:hover .ppr-name{color:var(--mustard)}
@@ -354,9 +358,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
   <div class="pmodal">
     <button class="modal-close" onclick="closePersonModal()">✕</button>
     <div class="pmodal-head">
-      <div class="pmodal-initials" id="pm-initials"></div>
-      <div class="pmodal-name" id="pm-name"></div>
-      <div class="pmodal-meta" id="pm-meta"></div>
+      <div class="pmodal-photo" id="pm-photo">
+        <span class="pmodal-photo-initials" id="pm-initials"></span>
+      </div>
+      <div class="pmodal-info">
+        <div class="pmodal-name" id="pm-name"></div>
+        <div class="pmodal-meta" id="pm-meta"></div>
+      </div>
     </div>
     <div class="pmodal-body" id="pm-body"></div>
   </div>
@@ -623,44 +631,60 @@ function renderChrono(){
 function renderPeople(){
   const pg=document.getElementById('people-grid');
   pg.innerHTML='';
-  const teamMap={};
-  projects.forEach(p=>{
-    p.team.forEach(t=>{
-      if(!t)return;
-      if(!teamMap[t])teamMap[t]={name:t,projects:[]};
-      teamMap[t].projects.push(p);
-    });
-  });
-  Object.values(teamMap).sort((a,b)=>b.projects.length-a.projects.length).forEach(person=>{
-    const years=person.projects.map(p=>+p.year).filter(Boolean);
+  const people=window.peopleData||[];
+  if(!people.length){
+    pg.innerHTML='<div style="color:rgba(255,255,255,0.3);font-family:Century Gothic,sans-serif;font-size:13px;padding:40px">No people data in sheet yet</div>';
+    return;
+  }
+  people.forEach(person=>{
+    if(!person.name)return;
+    // find projects this person worked on from Projects sheet
+    const personProjects=projects.filter(p=>
+      p.team.some(t=>t.toLowerCase().trim()===person.name.toLowerCase().trim())
+    );
+    const photoSrc=person.photo?gdrive(person.photo):null;
     const div=document.createElement('div');
     div.className='person-card';
-    const personData=(window.peopleData||[]).find(p=>p.name.toLowerCase()===person.name.toLowerCase());
-    const photoSrc=personData&&personData.photo?gdrive(personData.photo):null;
-    const avatarHTML=photoSrc
-      ?`<div class="person-avatar" style="padding:0;overflow:hidden"><img src="${photoSrc}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentElement.innerHTML='${initials(person.name)}'"></div>`
-      :`<div class="person-avatar">${initials(person.name)}</div>`;
     div.innerHTML=`
-      ${avatarHTML}
+      <div class="person-avatar" style="padding:0;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center">
+        ${photoSrc
+          ?`<img src="${photoSrc}" style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+          :''}
+        <span style="font-size:36px;font-weight:700;color:var(--mustard);${photoSrc?'display:none':''}">${initials(person.name)}</span>
+      </div>
       <div class="person-name">${person.name}</div>
-      <div class="person-role">${years.length?Math.min(...years)+'–'+Math.max(...years):''}</div>
-      <div class="person-count">${person.projects.length} project${person.projects.length!==1?'s':''}</div>`;
-    div.onclick=()=>openPersonModal(person);
+      <div class="person-role">${person.year||''}</div>
+      <div class="person-count">${personProjects.length?personProjects.length+' project'+(personProjects.length!==1?'s':''):'—'}</div>`;
+    div.onclick=()=>openPersonModal({name:person.name,year:person.year,photo:person.photo,projects:personProjects});
     pg.appendChild(div);
   });
 }
 
 function openPersonModal(person){
   const years=person.projects.map(p=>+p.year).filter(Boolean);
+  // Photo
+  const photoBox=document.getElementById('pm-photo');
+  const photoSrc=person.photo?gdrive(person.photo):null;
+  photoBox.querySelectorAll('img').forEach(i=>i.remove());
   document.getElementById('pm-initials').textContent=initials(person.name);
+  document.getElementById('pm-initials').style.display='';
+  if(photoSrc){
+    const img=document.createElement('img');
+    img.src=photoSrc;
+    img.onerror=()=>{img.remove();document.getElementById('pm-initials').style.display='';};
+    img.onload=()=>{document.getElementById('pm-initials').style.display='none';};
+    photoBox.appendChild(img);
+  }
   document.getElementById('pm-name').textContent=person.name;
-  document.getElementById('pm-meta').textContent=`${person.projects.length} projects${years.length?' · '+Math.min(...years)+'–'+Math.max(...years):''}`;
-  document.getElementById('pm-body').innerHTML=person.projects.sort((a,b)=>(+b.year||0)-(+a.year||0)).map(p=>`
-    <div class="pmodal-proj-row" onclick="closePersonModal();openModal('${p.id}')">
-      <div class="ppr-year">${p.year||'—'}</div>
-      <div class="ppr-name">${p.name}</div>
-      <div class="ppr-cat">${p.cat||''}</div>
-    </div>`).join('');
+  document.getElementById('pm-meta').textContent=`${person.year||''}${person.projects.length?' · '+person.projects.length+' project'+(person.projects.length!==1?'s':''):''}`;
+  document.getElementById('pm-body').innerHTML=person.projects.length
+    ?person.projects.sort((a,b)=>(+b.year||0)-(+a.year||0)).map(p=>`
+      <div class="pmodal-proj-row" onclick="closePersonModal();openModal('${p.id}')">
+        <div class="ppr-year">${p.year||'—'}</div>
+        <div class="ppr-name">${p.name}</div>
+        <div class="ppr-cat">${p.cat||''}</div>
+      </div>`).join('')
+    :`<div style="padding:20px 0;color:rgba(255,255,255,0.3);font-size:13px">No projects linked yet</div>`;
   document.getElementById('person-overlay').classList.add('open');
 }
 function closePersonModal(){document.getElementById('person-overlay').classList.remove('open');}
