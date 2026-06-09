@@ -33,12 +33,35 @@ html,body{height:100%;overflow:hidden;overflow-x:hidden;font-family:'Century Got
 .body{display:flex;flex:1;overflow:hidden}
 
 /* SIDEBAR */
-.sidebar{width:var(--sidebar);flex-shrink:0;background:#161616;border-right:1px solid rgba(255,255,255,0.07);overflow-y:auto;padding:20px 0}
-.sb-section{margin-bottom:24px}
-.sb-title{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:8px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.25);padding:0 16px;margin-bottom:10px}
-.sb-item{display:flex;align-items:center;justify-content:space-between;padding:5px 16px;cursor:pointer;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.45);transition:all 0.1s;border-left:2px solid transparent}
-.sb-item:hover{color:var(--white);background:rgba(255,255,255,0.04)}
-.sb-item.on{color:var(--mustard);border-left-color:var(--mustard);background:rgba(245,197,24,0.06)}
+.sidebar{width:var(--sidebar);flex-shrink:0;background:#161616;border-right:1px solid rgba(255,255,255,0.07);overflow-y:auto;padding:12px 0}
+.sb-section{border-bottom:1px solid rgba(255,255,255,0.06)}
+.sb-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;cursor:pointer;
+  font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;
+  font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(255,255,255,0.4);
+  transition:color 0.15s;
+  user-select:none;
+}
+.sb-header:hover{color:rgba(255,255,255,0.7)}
+.sb-header.open{color:var(--mustard)}
+.sb-arrow{font-size:8px;transition:transform 0.2s;opacity:0.5}
+.sb-header.open .sb-arrow{transform:rotate(180deg);opacity:1}
+.sb-header-count{font-size:9px;color:rgba(255,255,255,0.2);font-weight:400;letter-spacing:0}
+.sb-header.open .sb-header-count{color:var(--mustard)}
+.sb-body{display:none;padding:0 0 8px}
+.sb-body.open{display:block}
+.sb-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:5px 16px 5px 20px;cursor:pointer;
+  font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;
+  font-size:11px;font-weight:400;letter-spacing:0.04em;text-transform:uppercase;
+  color:rgba(255,255,255,0.35);transition:all 0.1s;
+  border-left:2px solid transparent;
+}
+.sb-item:hover{color:var(--white);background:rgba(255,255,255,0.03)}
+.sb-item.on{color:var(--mustard);border-left-color:var(--mustard);background:rgba(245,197,24,0.05)}
 .sb-item.on .sb-count{color:var(--mustard)}
 .sb-count{font-size:10px;color:rgba(255,255,255,0.2);font-weight:400}
 .sb-divider{height:1px;background:rgba(255,255,255,0.06);margin:4px 16px 16px}
@@ -311,44 +334,79 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
   </div>
   <div class="body">
     <div class="sidebar">
+      <!-- Search -->
+      <div class="sb-section" style="border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 16px">
+        <input class="search-input" type="text" placeholder="Search..." oninput="applyFilters()" style="width:100%">
+      </div>
+
+      <!-- Category -->
       <div class="sb-section">
-        <div class="search-wrap">
-          <input class="search-input" type="text" placeholder="Search projects..." oninput="applyFilters()">
+        <div class="sb-header open" onclick="toggleSection(this)">
+          <span>Category</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="sb-header-count" id="hcnt-cat"></span>
+            <span class="sb-arrow">▼</span>
+          </div>
+        </div>
+        <div class="sb-body open">
+          <div class="sb-item" onclick="toggleFilter('cat','Eat',this)"><span>Eat</span><span class="sb-count" id="cnt-Eat">0</span></div>
+          <div class="sb-item" onclick="toggleFilter('cat','Live',this)"><span>Live</span><span class="sb-count" id="cnt-Live">0</span></div>
+          <div class="sb-item" onclick="toggleFilter('cat','Pray',this)"><span>Pray</span><span class="sb-count" id="cnt-Pray">0</span></div>
+          <div class="sb-item" onclick="toggleFilter('cat','Work',this)"><span>Work</span><span class="sb-count" id="cnt-Work">0</span></div>
+          <div class="sb-item" onclick="toggleFilter('cat','Shop',this)"><span>Shop</span><span class="sb-count" id="cnt-Shop">0</span></div>
+          <div class="sb-item" onclick="toggleFilter('cat','Learn',this)"><span>Learn</span><span class="sb-count" id="cnt-Learn">0</span></div>
+          <div class="sb-item" onclick="toggleFilter('cat','Celebrate',this)"><span>Celebrate</span><span class="sb-count" id="cnt-Celebrate">0</span></div>
         </div>
       </div>
+
+      <!-- Status -->
       <div class="sb-section">
-        <div class="sb-title">Category</div>
-        <div class="sb-item" onclick="toggleFilter('cat','Eat',this)"><span>Eat</span><span class="sb-count" id="cnt-Eat">0</span></div>
-        <div class="sb-item" onclick="toggleFilter('cat','Live',this)"><span>Live</span><span class="sb-count" id="cnt-Live">0</span></div>
-        <div class="sb-item" onclick="toggleFilter('cat','Pray',this)"><span>Pray</span><span class="sb-count" id="cnt-Pray">0</span></div>
-        <div class="sb-item" onclick="toggleFilter('cat','Work',this)"><span>Work</span><span class="sb-count" id="cnt-Work">0</span></div>
-        <div class="sb-item" onclick="toggleFilter('cat','Shop',this)"><span>Shop</span><span class="sb-count" id="cnt-Shop">0</span></div>
-        <div class="sb-item" onclick="toggleFilter('cat','Learn',this)"><span>Learn</span><span class="sb-count" id="cnt-Learn">0</span></div>
-        <div class="sb-item" onclick="toggleFilter('cat','Celebrate',this)"><span>Celebrate</span><span class="sb-count" id="cnt-Celebrate">0</span></div>
-      </div>
-      <div class="sb-divider"></div>
-      <div class="sb-section">
-        <div class="sb-title">Status</div>
-        <div class="sb-item" onclick="toggleFilter('status','Built',this)"><span>Built</span><span class="sb-count" id="cnt-Built">0</span></div>
-        <div class="sb-item" onclick="toggleFilter('status','Unbuilt',this)"><span>Unbuilt</span><span class="sb-count" id="cnt-Unbuilt">0</span></div>
-        <div class="sb-item" onclick="toggleFilter('status','On Site',this)"><span>On Site</span><span class="sb-count" id="cnt-OnSite">0</span></div>
-        <div class="sb-item" onclick="toggleFilter('status','Competition',this)"><span>Competition</span><span class="sb-count" id="cnt-Competition">0</span></div>
-      </div>
-      <div class="sb-divider"></div>
-      <div class="sb-section">
-        <div class="sb-title">Location</div>
-        <div id="location-filters"></div>
-      </div>
-      <div class="sb-divider"></div>
-      <div class="sb-section">
-        <div class="sb-title">Year — <span id="year-range-lbl">2008–2025</span></div>
-        <div class="year-slider-wrap">
-          <input type="range" id="year-min" min="2008" max="2025" value="2008" oninput="applyFilters();updateYearLabel()">
-          <input type="range" id="year-max" min="2008" max="2025" value="2025" oninput="applyFilters();updateYearLabel()" style="margin-top:6px">
+        <div class="sb-header" onclick="toggleSection(this)">
+          <span>Status</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="sb-header-count" id="hcnt-status"></span>
+            <span class="sb-arrow">▼</span>
+          </div>
+        </div>
+        <div class="sb-body">
+          <div class="sb-item" onclick="toggleFilter('status','Built',this)"><span>Built</span><span class="sb-count" id="cnt-Built">0</span></div>
+          <div class="sb-item" onclick="toggleFilter('status','Unbuilt',this)"><span>Unbuilt</span><span class="sb-count" id="cnt-Unbuilt">0</span></div>
+          <div class="sb-item" onclick="toggleFilter('status','On Site',this)"><span>On Site</span><span class="sb-count" id="cnt-OnSite">0</span></div>
+          <div class="sb-item" onclick="toggleFilter('status','Competition',this)"><span>Competition</span><span class="sb-count" id="cnt-Competition">0</span></div>
         </div>
       </div>
-      <div class="sb-divider"></div>
-      <button class="clear-btn" onclick="clearFilters()">Clear all filters</button>
+
+      <!-- Location -->
+      <div class="sb-section">
+        <div class="sb-header" onclick="toggleSection(this)">
+          <span>Location</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="sb-header-count" id="hcnt-loc"></span>
+            <span class="sb-arrow">▼</span>
+          </div>
+        </div>
+        <div class="sb-body" id="location-filters"></div>
+      </div>
+
+      <!-- Year -->
+      <div class="sb-section">
+        <div class="sb-header" onclick="toggleSection(this)">
+          <span>Year</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="sb-header-count" id="year-range-lbl">2008–2025</span>
+            <span class="sb-arrow">▼</span>
+          </div>
+        </div>
+        <div class="sb-body">
+          <div class="year-slider-wrap" style="padding:4px 16px 8px">
+            <div style="display:flex;justify-content:space-between;font-family:'Century Gothic',sans-serif;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:6px"><span>2008</span><span>2025</span></div>
+            <input type="range" id="year-min" min="2008" max="2025" value="2008" oninput="applyFilters();updateYearLabel()">
+            <input type="range" id="year-max" min="2008" max="2025" value="2025" oninput="applyFilters();updateYearLabel()" style="margin-top:8px">
+          </div>
+        </div>
+      </div>
+
+      <button class="clear-btn" onclick="clearFilters()" style="margin:12px 16px;width:calc(100% - 32px)">Clear all filters</button>
     </div>
     <div class="main">
       <div id="view-canvas"><div class="canvas-inner" id="canvas"></div></div>
@@ -466,6 +524,7 @@ function toggleFilter(cat,val,el){
   if(s.has(val)){s.delete(val);el.classList.remove('on');}
   else{s.add(val);el.classList.add('on');}
   applyFilters();
+  updateCounts();
 }
 
 function updateYearLabel(){
@@ -478,17 +537,90 @@ function applyFilters(){
   const q=document.querySelector('.search-input').value.toLowerCase();
   const mn=+document.getElementById('year-min').value;
   const mx=+document.getElementById('year-max').value;
+  const noFilters=filters.cat.size===0&&filters.status.size===0&&filters.loc.size===0&&!q;
+
+  // If no filters, restore original positions
+  if(noFilters){
+    document.querySelectorAll('.pcard').forEach(card=>{
+      const p=projects.find(x=>x.id===card.dataset.id);
+      if(!p)return;
+      card.classList.remove('dimmed');
+      card.style.left=p.x+'px';
+      card.style.top=p.y+'px';
+    });
+    return;
+  }
+
+  const canvas=document.getElementById('canvas');
+  const canvasW=canvas.offsetWidth||window.innerWidth-220;
+  const CARD=210,GAP=24,SX=10;
+  const cols=Math.max(1,Math.floor((canvasW-SX)/(CARD+GAP)));
+
+  // Categorise each project
+  // matchGroup: which filter group it belongs to (first matching filter key)
+  // unmatched: doesn't match any active filter
+  const matched=[]; // {card, p, groupKey}
+  const unmatched=[]; // {card, p}
+
   document.querySelectorAll('.pcard').forEach(card=>{
     const p=projects.find(x=>x.id===card.dataset.id);
-    if(!p){card.classList.add('dimmed');return;}
+    if(!p)return;
     const yr=+p.year||0;
-    const catOk=filters.cat.size===0||filters.cat.has(p.cat);
-    const statOk=filters.status.size===0||filters.status.has(p.status);
-    const locOk=filters.loc.size===0||filters.loc.has(p.loc);
     const yrOk=!p.year||(yr>=mn&&yr<=mx);
-    const qOk=!q||(p.name+p.code+p.city+p.loc).toLowerCase().includes(q);
-    card.classList.toggle('dimmed',!(catOk&&statOk&&locOk&&yrOk&&qOk));
+    const qOk=!q||(p.name+(p.code||'')+(p.city||'')+(p.loc||'')).toLowerCase().includes(q);
+
+    // Check each active filter group
+    let matchKey=null;
+    // Cat filters
+    if(filters.cat.size>0&&filters.cat.has(p.cat)){matchKey='cat:'+p.cat;}
+    // Status filters
+    if(filters.status.size>0&&filters.status.has(p.status)){
+      matchKey=matchKey||'status:'+p.status;
+    }
+    // Loc filters
+    if(filters.loc.size>0&&filters.loc.has(p.loc)){
+      matchKey=matchKey||'loc:'+p.loc;
+    }
+
+    const isMatch=matchKey&&yrOk&&qOk;
+    if(isMatch) matched.push({card,p,groupKey:matchKey});
+    else unmatched.push({card,p});
   });
+
+  // Sort matched by group key so same-group cards are together
+  // Preserve order within each group by original project index
+  matched.sort((a,b)=>{
+    if(a.groupKey<b.groupKey)return-1;
+    if(a.groupKey>b.groupKey)return 1;
+    return projects.indexOf(a.p)-projects.indexOf(b.p);
+  });
+
+  // Position matched cards at top
+  matched.forEach(({card,p},i)=>{
+    const col=i%cols;
+    const row=Math.floor(i/cols);
+    const nx=SX+col*(CARD+GAP);
+    const ny=10+row*(CARD+GAP);
+    card.style.left=nx+'px';
+    card.style.top=ny+'px';
+    card.classList.remove('dimmed');
+  });
+
+  // Position unmatched cards below matched rows
+  const matchedRows=Math.ceil(matched.length/cols)||0;
+  const unmatchedStartY=10+matchedRows*(CARD+GAP)+(matched.length?GAP*2:0);
+
+  unmatched.forEach(({card,p},i)=>{
+    const col=i%cols;
+    const row=Math.floor(i/cols);
+    const nx=SX+col*(CARD+GAP);
+    const ny=unmatchedStartY+row*(CARD+GAP);
+    card.style.left=nx+'px';
+    card.style.top=ny+'px';
+    card.classList.add('dimmed');
+  });
+
+  expandCanvas();
 }
 
 function clearFilters(){
@@ -498,7 +630,16 @@ function clearFilters(){
   document.getElementById('year-max').value=2025;
   updateYearLabel();
   document.querySelector('.search-input').value='';
-  applyFilters();
+  // Restore original positions
+  document.querySelectorAll('.pcard').forEach(card=>{
+    const p=projects.find(x=>x.id===card.dataset.id);
+    if(!p)return;
+    card.classList.remove('dimmed');
+    card.style.left=p.x+'px';
+    card.style.top=p.y+'px';
+  });
+  updateCounts();
+  expandCanvas();
 }
 
 function updateCounts(){
@@ -516,6 +657,16 @@ function updateCounts(){
   const lf=document.getElementById('location-filters');
   lf.innerHTML=locs.map(l=>`<div class="sb-item" onclick="toggleFilter('loc','${l}',this)"><span>${l}</span><span class="sb-count">${projects.filter(p=>p.loc===l).length}</span></div>`).join('');
   document.getElementById('proj-count').textContent=projects.length+' project'+(projects.length!==1?'s':'');
+  // Update header active counts
+  const activeCats=[...filters.cat];
+  const hcat=document.getElementById('hcnt-cat');
+  if(hcat)hcat.textContent=activeCats.length?activeCats.length+' active':'';
+  const activeStats=[...filters.status];
+  const hstat=document.getElementById('hcnt-status');
+  if(hstat)hstat.textContent=activeStats.length?activeStats.length+' active':'';
+  const activeLocs=[...filters.loc];
+  const hloc=document.getElementById('hcnt-loc');
+  if(hloc)hloc.textContent=activeLocs.length?activeLocs.length+' active':'';
 }
 
 function getPos(idx){
@@ -891,6 +1042,12 @@ function setImgMode(isDrawing){
   // Also refresh chronology if visible
   const chronoVisible=document.getElementById('view-chrono').style.display!=='none';
   if(chronoVisible)renderChrono();
+}
+
+function toggleSection(header){
+  header.classList.toggle('open');
+  const body=header.nextElementSibling;
+  body.classList.toggle('open');
 }
 
 function toggleSidebar(){
