@@ -125,17 +125,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 .sd-competition{background:rgba(255,255,255,0.3)}
 
 /* CHRONOLOGY */
-#view-chrono{position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;display:none;padding:0}
+#view-chrono{position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;display:none;padding:0;scrollbar-width:thin;scrollbar-color:rgba(245,197,24,0.3) transparent}
 .chrono-inner{
-  min-width:3200px;
+  display:inline-flex;
+  min-width:100%;
   height:100%;
-  max-height:100%;
   background-color:var(--black);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
   background-size:40px 40px;
-  padding:60px 60px 40px;
-  position:relative;
-  overflow-y:hidden;
+  overflow:visible;
 }
 .chrono-axis{position:absolute;top:140px;left:60px;right:60px;height:1px;background:rgba(255,255,255,0.15)}
 .chrono-years{position:absolute;top:60px;left:60px;right:60px;display:flex;justify-content:space-between}
@@ -634,7 +632,6 @@ function renderChrono(){
   const CARD_W=150;
   const CARD_H=180;
   const CARD_GAP=10;
-  const COLS=2; // max 2 cards per row per year
   const YEAR_PADDING=32; // padding left+right per year block
   const YEAR_GAP=24; // gap between year blocks
   const TOP_OFFSET=90; // space for year label at top
@@ -646,8 +643,9 @@ function renderChrono(){
 
   years.forEach(yr=>{
     const ps=byYear[yr];
-    const rows=Math.ceil(ps.length/COLS);
-    const blockW=COLS*(CARD_W+CARD_GAP)-CARD_GAP+(YEAR_PADDING*2);
+    const MAX_ROWS=2;
+    const cols=Math.ceil(ps.length/MAX_ROWS);
+    const blockW=cols*(CARD_W+CARD_GAP)-CARD_GAP+(YEAR_PADDING*2);
 
     const block=document.createElement('div');
     block.style.cssText=`
@@ -682,7 +680,9 @@ function renderChrono(){
     const grid=document.createElement('div');
     grid.style.cssText=`
       display:grid;
-      grid-template-columns:repeat(${Math.min(COLS,ps.length)},${CARD_W}px);
+      grid-template-columns:repeat(${cols},${CARD_W}px);
+      grid-template-rows:repeat(${MAX_ROWS},auto);
+      grid-auto-flow:column;
       gap:${CARD_GAP}px;
       padding:0 ${YEAR_PADDING}px;
     `;
