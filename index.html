@@ -320,7 +320,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 /* THEME TRIANGLES */
 .theme-flags{
   position:absolute;
-  top:4px;right:4px;
+  top:6px;right:6px;
   z-index:8;
   pointer-events:none;
 }
@@ -518,32 +518,68 @@ let projects=[];
 window.peopleData=[];
 let drawingMode=false;
 
-const THEME_COLORS={
-  'outdoor room':'#e74c3c',
-  'weight':'#3498db',
-  'object':'#2ecc71',
-  'corbelling':'#9b59b6',
-  'threshold':'#e67e22',
-  'collective space':'#1abc9c',
-  'material economy':'#f39c12',
-  'lightness':'#00cec9',
-  'section':'#fd79a8',
-  'courtyard':'#6c5ce7',
-  'landscape':'#55efc4',
-  'outdoor classroom':'#fdcb6e',
-  'civic space':'#74b9ff',
-  'materiality':'#a29bfe',
-};
-function getThemeColor(theme){
-  if(!theme)return'#888';
+// Each theme maps to an SVG shape (viewBox 0 0 20 20)
+const THEME_ICONS=[
+  // heart
+  {shape:'heart', svg:'<path d="M10 17s-7-4.5-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 17 8c0 4.5-7 9-7 9z"/>'},
+  // asterisk
+  {shape:'asterisk', svg:'<path d="M10 2v16M2 10h16M4.1 4.1l11.8 11.8M15.9 4.1L4.1 15.9" stroke-width="2.5" stroke-linecap="round"/>'},
+  // donut
+  {shape:'donut', svg:'<circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3" fill="transparent" style="mix-blend-mode:destination-out"/>'},
+  // corner step
+  {shape:'step', svg:'<path d="M3 17V8h5V3h9v14z"/>'},
+  // blob/peanut
+  {shape:'blob', svg:'<ellipse cx="10" cy="6" rx="4" ry="4"/><ellipse cx="10" cy="14" rx="4" ry="4"/>'},
+  // arch
+  {shape:'arch', svg:'<path d="M3 16 Q3 6 10 6 Q17 6 17 16z"/>'},
+  // 4-petal flower
+  {shape:'flower', svg:'<circle cx="10" cy="6" r="4"/><circle cx="10" cy="14" r="4"/><circle cx="6" cy="10" r="4"/><circle cx="14" cy="10" r="4"/>'},
+  // stack/spine
+  {shape:'stack', svg:'<rect x="4" y="3" width="12" height="4" rx="2"/><rect x="4" y="8" width="12" height="4" rx="2"/><rect x="4" y="13" width="12" height="4" rx="2"/>'},
+  // quarter arc
+  {shape:'arc', svg:'<path d="M16 16 A10 10 0 0 0 4 16" stroke-width="4" stroke-linecap="round" fill="none"/>'},
+  // cloud/4-blob
+  {shape:'cloud', svg:'<circle cx="7" cy="7" r="4"/><circle cx="13" cy="7" r="4"/><circle cx="7" cy="13" r="4"/><circle cx="13" cy="13" r="4"/>'},
+  // rainbow
+  {shape:'rainbow', svg:'<path d="M3 13 A7 7 0 0 1 17 13" stroke-width="3.5" stroke-linecap="round" fill="none"/>'},
+  // hourglass
+  {shape:'hourglass', svg:'<path d="M4 3h12l-5 7 5 7H4l5-7z"/>'},
+  // 4-star / sparkle
+  {shape:'sparkle', svg:'<path d="M10 2 L11.5 8.5 L18 10 L11.5 11.5 L10 18 L8.5 11.5 L2 10 L8.5 8.5z"/>'},
+  // ring
+  {shape:'ring', svg:'<circle cx="10" cy="10" r="7" stroke-width="3" fill="none"/>'},
+  // scallop
+  {shape:'scallop', svg:'<path d="M3 14 Q5 10 7 14 Q9 10 11 14 Q13 10 15 14 Q17 10 17 14 L17 17 L3 17z"/>'},
+  // crown/battlements
+  {shape:'crown', svg:'<path d="M3 16V8l2.5 3 2.5-6 2.5 6 2.5-6 2.5 6 2.5-3v8z"/>'},
+];
+
+function getThemeIcon(theme){
+  if(!theme)return null;
   const key=theme.trim().toLowerCase();
-  const match=Object.keys(THEME_COLORS).find(k=>k.toLowerCase()===key);
-  if(match)return THEME_COLORS[match];
-  // Generate consistent colour for unknown themes from hash
+  // Hash to consistently pick same icon for same theme name
   let hash=0;
   for(let i=0;i<key.length;i++)hash=key.charCodeAt(i)+((hash<<5)-hash);
-  const h=Math.abs(hash)%360;
-  return`hsl(${h},65%,60%)`;
+  return THEME_ICONS[Math.abs(hash)%THEME_ICONS.length];
+}
+
+function getRarestTheme(themes,themeCounts){
+  if(!themes||!themes.length)return null;
+  return themes.reduce((rarest,t)=>{
+    const cnt=themeCounts[t.trim().toLowerCase()]||999;
+    const rCnt=themeCounts[rarest.trim().toLowerCase()]||999;
+    return cnt<rCnt?t:rarest;
+  });
+}
+
+// Build theme counts from current projects (updated after load)
+let globalThemeCounts={};
+function buildThemeCounts(){
+  globalThemeCounts={};
+  projects.forEach(p=>(p.themes||[]).forEach(t=>{
+    const k=t.trim().toLowerCase();
+    globalThemeCounts[k]=(globalThemeCounts[k]||0)+1;
+  }));
 }
 
 
@@ -778,15 +814,15 @@ function renderCard(p){
   card.className='pcard';card.dataset.id=p.id;
   card.style.left=p.x+'px';card.style.top=p.y+'px';
   const imgSrc=gdrive(drawingMode?p.drawing:p.img);
-  const themes=(p.themes||[]).slice(0,6);
+  const themes=(p.themes||[]);
   let flagsHTML='';
   if(themes.length){
-    let polys='';
-    themes.forEach((t,i)=>{
-      const angle=Math.round(i*45);
-      polys+=`<g transform="rotate(${angle},14,14)"><polygon points="14,3 22,19 6,19" fill="${getThemeColor(t)}" opacity="0.7"/></g>`;
-    });
-    flagsHTML=`<svg class="theme-flags-svg" width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">${polys}</svg>`;
+    const rarest=getRarestTheme(themes,globalThemeCounts);
+    const icon=getThemeIcon(rarest);
+    if(icon){
+      const isStrokeOnly=icon.svg.includes('fill="none"')||icon.svg.includes("fill='none'");
+      flagsHTML=`<svg class="theme-flags-svg" width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="${isStrokeOnly?'none':'white'}" stroke="white" stroke-width="${isStrokeOnly?'0':'0'}" opacity="0.75">${icon.svg}</svg>`;
+    }
   }
 
   card.innerHTML=`
@@ -1114,6 +1150,7 @@ function loadDemo(){
   ];
   DEMO.forEach((d,i)=>{d.id='d'+i;const pos=getPos(i);d.x=pos.x;d.y=pos.y;projects.push(d);renderCard(d);});
   updateCounts();
+  buildThemeCounts();
 }
 
 function setImgMode(isDrawing){
