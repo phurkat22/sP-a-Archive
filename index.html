@@ -596,7 +596,11 @@ function openModal(id){
   const imgArea=document.getElementById('modal-img');
   imgArea.querySelectorAll('img').forEach(i=>i.remove());
   const noImg=imgArea.querySelector('.no-img');
-  const imgs=[p.img,p.img2,p.img3].filter(Boolean);
+  // In drawing mode show drawing as first image, then photos
+  const featureImg=drawingMode&&p.drawing ? p.drawing : p.img;
+  const imgs=drawingMode
+    ? [p.drawing,p.img,p.img2,p.img3].filter(Boolean)
+    : [p.img,p.img2,p.img3].filter(Boolean);
   if(imgs.length){
     if(noImg)noImg.style.display='none';
     const img=document.createElement('img');img.src=gdrive(imgs[0]);imgArea.insertBefore(img,imgArea.firstChild);
@@ -622,7 +626,9 @@ function openModal(id){
 
 function switchModalImg(id,idx){
   const p=projects.find(x=>x.id===id);if(!p)return;
-  const imgs=[p.img,p.img2,p.img3].filter(Boolean);
+  const imgs=drawingMode
+    ?[p.drawing,p.img,p.img2,p.img3].filter(Boolean)
+    :[p.img,p.img2,p.img3].filter(Boolean);
   const imgArea=document.getElementById('modal-img');
   imgArea.querySelectorAll('img').forEach(i=>i.remove());
   document.querySelectorAll('.mit').forEach((b,i)=>b.classList.toggle('on',i===idx));
