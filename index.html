@@ -389,6 +389,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
         <div class="sb-body" id="location-filters"></div>
       </div>
 
+      <!-- Themes -->
+      <div class="sb-section">
+        <div class="sb-header" onclick="toggleSection(this)">
+          <span>Theme</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="sb-header-count" id="hcnt-theme"></span>
+            <span class="sb-arrow">▼</span>
+          </div>
+        </div>
+        <div class="sb-body" id="theme-filters"></div>
+      </div>
+
       <!-- Year -->
       <div class="sb-section">
         <div class="sb-header" onclick="toggleSection(this)">
@@ -495,7 +507,7 @@ let projects=[];
 window.peopleData=[];
 let drawingMode=false;
 
-let filters={cat:new Set(),status:new Set(),loc:new Set()};
+let filters={cat:new Set(),status:new Set(),loc:new Set(),theme:new Set()};
 const CW=210,GAP=24,COLS=9,SX=40,SY=40,SX_ORIG=40,SY_ORIG=40;
 
 function gdrive(url){
@@ -572,15 +584,12 @@ function applyFilters(){
 
     // Check each active filter group
     let matchKey=null;
-    // Cat filters
     if(filters.cat.size>0&&filters.cat.has(p.cat)){matchKey='cat:'+p.cat;}
-    // Status filters
-    if(filters.status.size>0&&filters.status.has(p.status)){
-      matchKey=matchKey||'status:'+p.status;
-    }
-    // Loc filters
-    if(filters.loc.size>0&&filters.loc.has(p.loc)){
-      matchKey=matchKey||'loc:'+p.loc;
+    if(filters.status.size>0&&filters.status.has(p.status)){matchKey=matchKey||'status:'+p.status;}
+    if(filters.loc.size>0&&filters.loc.has(p.loc)){matchKey=matchKey||'loc:'+p.loc;}
+    if(filters.theme.size>0){
+      const matchedTheme=(p.themes||[]).find(t=>filters.theme.has(t));
+      if(matchedTheme)matchKey=matchKey||'theme:'+matchedTheme;
     }
 
     const isMatch=matchKey&&yrOk&&qOk;
@@ -625,7 +634,7 @@ function applyFilters(){
 }
 
 function clearFilters(){
-  ['cat','status','loc'].forEach(k=>filters[k].clear());
+  ['cat','status','loc','theme'].forEach(k=>filters[k].clear());
   document.querySelectorAll('.sb-item.on').forEach(el=>el.classList.remove('on'));
   document.getElementById('year-min').value=2008;
   document.getElementById('year-max').value=2025;
@@ -654,9 +663,6 @@ function updateCounts(){
     const el=document.getElementById(id);
     if(el)el.textContent=projects.filter(p=>p.status===s).length;
   });
-  const locs=[...new Set(projects.map(p=>p.loc).filter(Boolean))].sort();
-  const lf=document.getElementById('location-filters');
-  lf.innerHTML=locs.map(l=>`<div class="sb-item" onclick="toggleFilter('loc','${l}',this)"><span>${l}</span><span class="sb-count">${projects.filter(p=>p.loc===l).length}</span></div>`).join('');
   document.getElementById('proj-count').textContent=projects.length+' project'+(projects.length!==1?'s':'');
   // Update header active counts
   const activeCats=[...filters.cat];
@@ -668,6 +674,36 @@ function updateCounts(){
   const activeLocs=[...filters.loc];
   const hloc=document.getElementById('hcnt-loc');
   if(hloc)hloc.textContent=activeLocs.length?activeLocs.length+' active':'';
+  const activeThemes=[...filters.theme];
+  const htheme=document.getElementById('hcnt-theme');
+  if(htheme)htheme.textContent=activeThemes.length?activeThemes.length+' active':'';
+
+  // Build theme filters dynamically from project data
+  const themeCounts={};
+  projects.forEach(p=>{
+    (p.themes||[]).forEach(t=>{
+      if(t)themeCounts[t]=(themeCounts[t]||0)+1;
+    });
+  });
+  const tf=document.getElementById('theme-filters');
+  if(tf){
+    const sorted=Object.entries(themeCounts).sort((a,b)=>b[1]-a[1]);
+    tf.innerHTML=sorted.map(([t,cnt])=>{
+      const isOn=filters.theme.has(t);
+      return`<div class="sb-item${isOn?' on':''}" onclick="toggleFilter('theme','${t.replace(/'/g,"\'")}',this)"><span>${t}</span><span class="sb-count">${cnt}</span></div>`;
+    }).join('');
+  }
+
+  // Build location filters dynamically
+  const locs=[...new Set(projects.map(p=>p.loc).filter(Boolean))].sort();
+  const lf=document.getElementById('location-filters');
+  if(lf){
+    lf.innerHTML=locs.map(l=>{
+      const cnt=projects.filter(p=>p.loc===l).length;
+      const isOn=filters.loc.has(l);
+      return`<div class="sb-item${isOn?' on':''}" onclick="toggleFilter('loc','${l}',this)"><span>${l}</span><span class="sb-count">${cnt}</span></div>`;
+    }).join('');
+  }
 }
 
 function getPos(idx){
@@ -693,7 +729,7 @@ function renderCard(p){
   const card=document.createElement('div');
   card.className='pcard';card.dataset.id=p.id;
   card.style.left=p.x+'px';card.style.top=p.y+'px';
-  const imgSrc=gdrive(drawingMode?(p.drawing||p.img):p.img);
+  const imgSrc=gdrive(drawingMode?p.drawing:p.img);
   card.innerHTML=`
     <div class="card-img" id="ci-${p.id}">
       ${imgSrc?`<img src="${imgSrc}" alt="">`:`<div class="ph"><svg width="40" height="30" viewBox="0 0 40 30" fill="none"><rect x="1" y="6" width="38" height="22" stroke="white" stroke-width="1"/><polyline points="1,6 20,1 39,6" stroke="white" stroke-width="1"/></svg></div>`}
@@ -868,7 +904,7 @@ function renderChrono(){
       const card=document.createElement('div');
       card.className='ccard';
       card.style.cssText=`position:relative;transform:none;width:${CARD_W}px;`;
-      const imgSrc=gdrive(drawingMode?(p.drawing||p.img):p.img);
+      const imgSrc=gdrive(drawingMode?p.drawing:p.img);
       card.innerHTML=`
         <div class="cc-img">
           ${imgSrc
@@ -1028,7 +1064,7 @@ function setImgMode(isDrawing){
   projects.forEach(p=>{
     const box=document.getElementById('ci-'+p.id);
     if(!box)return;
-    const src=isDrawing?(p.drawing||null):(p.img||null);
+    const src=isDrawing?p.drawing:(p.img||null);
     const displaySrc=src?gdrive(src):null;
     box.querySelectorAll('img').forEach(i=>i.remove());
     const ph=box.querySelector('.ph');
@@ -1040,9 +1076,8 @@ function setImgMode(isDrawing){
       if(ph)ph.style.display='flex';
     }
   });
-  // Also refresh chronology if visible
-  const chronoVisible=document.getElementById('view-chrono').style.display!=='none';
-  if(chronoVisible)renderChrono();
+  // Always re-render chronology so toggle is reflected when switching modes
+  renderChrono();
 }
 
 function toggleSection(header){
