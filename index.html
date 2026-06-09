@@ -58,9 +58,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 .main{flex:1;overflow:hidden;position:relative}
 
 /* CANVAS */
-#view-canvas{position:absolute;inset:0;overflow:auto;display:block}
+#view-canvas{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;display:block}
 .canvas-inner{
-  position:relative;width:3800px;height:2800px;
+  position:relative;
+  width:100%;
+  min-height:100%;
   background-color:var(--black);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
   background-size:40px 40px;
@@ -246,7 +248,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
   .mode-nav{position:static!important;transform:none!important}
   .studio-name-wrap{margin-right:auto}
   .topbar{padding:0 12px;gap:0}
-  .canvas-inner{width:2400px;height:2000px}
+  .canvas-inner{width:100%;min-height:100%}
   .pcard{width:160px}
   .card-name{font-size:14px}
   .card-img{height:120px}
@@ -490,7 +492,22 @@ function updateCounts(){
 }
 
 function getPos(idx){
-  return{x:SX+(idx%COLS)*(CW+GAP),y:SY+Math.floor(idx/COLS)*(CW+GAP+60)};
+  const canvasWidth=document.getElementById('canvas').offsetWidth||window.innerWidth-220;
+  const cols=Math.max(1,Math.floor((canvasWidth-SX)/(CW+GAP)));
+  const col=idx%cols;
+  const row=Math.floor(idx/cols);
+  return{x:SX+col*(CW+GAP), y:SY+row*(CW+80+GAP)};
+}
+
+function expandCanvas(){
+  const canvas=document.getElementById('canvas');
+  const cards=canvas.querySelectorAll('.pcard');
+  let maxY=0;
+  cards.forEach(card=>{
+    const bottom=card.offsetTop+card.offsetHeight;
+    if(bottom>maxY)maxY=bottom;
+  });
+  canvas.style.minHeight=(maxY+100)+'px';
 }
 
 function renderCard(p){
@@ -512,6 +529,7 @@ function renderCard(p){
     </div>`;
   makeDraggable(card,p);
   document.getElementById('canvas').appendChild(card);
+  setTimeout(expandCanvas,50);
 }
 
 function makeDraggable(el,p){
@@ -528,11 +546,18 @@ function makeDraggable(el,p){
     const pt=e.touches?e.touches[0]:e;
     const nx=pt.clientX-sx,ny=pt.clientY-sy;
     if(Math.abs(nx-el.offsetLeft)>5||Math.abs(ny-el.offsetTop)>5)moved=true;
-    el.style.left=Math.max(0,nx)+'px';el.style.top=Math.max(0,ny)+'px';
-    p.x=Math.max(0,nx);p.y=Math.max(0,ny);e.preventDefault();
+    const canvas=document.getElementById('canvas');
+    const maxX=Math.max(0,canvas.offsetWidth-el.offsetWidth-4);
+    const clampedX=Math.min(Math.max(0,nx),maxX);
+    const clampedY=Math.max(0,ny);
+    el.style.left=clampedX+'px';el.style.top=clampedY+'px';
+    p.x=clampedX;p.y=clampedY;
+    expandCanvas();
+    e.preventDefault();
   };
   const onEnd=()=>{
     if(!dragging)return;dragging=false;el.style.zIndex='';
+    expandCanvas();
     if(!moved)openModal(p.id);
   };
   el.addEventListener('mousedown',onStart,{passive:false});
