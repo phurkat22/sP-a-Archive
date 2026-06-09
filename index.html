@@ -535,12 +535,15 @@ const THEME_COLORS={
   'materiality':'#a29bfe',
 };
 function getThemeColor(theme){
-  if(THEME_COLORS[theme])return THEME_COLORS[theme];
-  // Generate consistent colour for unknown themes
+  if(!theme)return'#888';
+  const key=theme.trim().toLowerCase();
+  const match=Object.keys(THEME_COLORS).find(k=>k.toLowerCase()===key);
+  if(match)return THEME_COLORS[match];
+  // Generate consistent colour for unknown themes from hash
   let hash=0;
-  for(let i=0;i<theme.length;i++)hash=theme.charCodeAt(i)+((hash<<5)-hash);
+  for(let i=0;i<key.length;i++)hash=key.charCodeAt(i)+((hash<<5)-hash);
   const h=Math.abs(hash)%360;
-  return`hsl(${h},65%,55%)`;
+  return`hsl(${h},65%,60%)`;
 }
 
 
@@ -587,7 +590,7 @@ function applyFilters(){
   const q=document.querySelector('.search-input').value.toLowerCase();
   const mn=+document.getElementById('year-min').value;
   const mx=+document.getElementById('year-max').value;
-  const noFilters=filters.cat.size===0&&filters.status.size===0&&filters.loc.size===0&&!q;
+  const noFilters=filters.cat.size===0&&filters.status.size===0&&filters.loc.size===0&&filters.theme.size===0&&!q;
 
   // If no filters, restore original positions
   if(noFilters){
