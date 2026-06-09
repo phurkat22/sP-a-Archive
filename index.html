@@ -316,6 +316,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 *::-webkit-scrollbar-thumb{background:rgba(245,197,24,0.3);border-radius:0}
 *::-webkit-scrollbar-thumb:hover{background:rgba(245,197,24,0.6)}
 *::-webkit-scrollbar-corner{background:transparent}
+
+/* THEME TRIANGLES */
+.theme-flags{
+  position:absolute;
+  top:4px;right:4px;
+  z-index:8;
+  pointer-events:none;
+}
+.theme-flags-svg{
+  display:block;
+}
 </style>
 </head>
 <body>
@@ -507,6 +518,32 @@ let projects=[];
 window.peopleData=[];
 let drawingMode=false;
 
+const THEME_COLORS={
+  'outdoor room':'#e74c3c',
+  'weight':'#3498db',
+  'object':'#2ecc71',
+  'corbelling':'#9b59b6',
+  'threshold':'#e67e22',
+  'collective space':'#1abc9c',
+  'material economy':'#f39c12',
+  'lightness':'#00cec9',
+  'section':'#fd79a8',
+  'courtyard':'#6c5ce7',
+  'landscape':'#55efc4',
+  'outdoor classroom':'#fdcb6e',
+  'civic space':'#74b9ff',
+  'materiality':'#a29bfe',
+};
+function getThemeColor(theme){
+  if(THEME_COLORS[theme])return THEME_COLORS[theme];
+  // Generate consistent colour for unknown themes
+  let hash=0;
+  for(let i=0;i<theme.length;i++)hash=theme.charCodeAt(i)+((hash<<5)-hash);
+  const h=Math.abs(hash)%360;
+  return`hsl(${h},65%,55%)`;
+}
+
+
 let filters={cat:new Set(),status:new Set(),loc:new Set(),theme:new Set()};
 const CW=210,GAP=24,COLS=9,SX=40,SY=40,SX_ORIG=40,SY_ORIG=40;
 
@@ -583,13 +620,16 @@ function applyFilters(){
     const qOk=!q||(p.name+(p.code||'')+(p.city||'')+(p.loc||'')).toLowerCase().includes(q);
 
     // Check each active filter group
+    // Each active filter type is checked independently
+    // groupKey = first matching filter value found, determines sort group
+    const noActiveFilters=filters.cat.size===0&&filters.status.size===0&&filters.loc.size===0&&filters.theme.size===0;
     let matchKey=null;
-    if(filters.cat.size>0&&filters.cat.has(p.cat)){matchKey='cat:'+p.cat;}
-    if(filters.status.size>0&&filters.status.has(p.status)){matchKey=matchKey||'status:'+p.status;}
-    if(filters.loc.size>0&&filters.loc.has(p.loc)){matchKey=matchKey||'loc:'+p.loc;}
-    if(filters.theme.size>0){
-      const matchedTheme=(p.themes||[]).find(t=>filters.theme.has(t));
-      if(matchedTheme)matchKey=matchKey||'theme:'+matchedTheme;
+    if(filters.cat.size>0&&filters.cat.has(p.cat))matchKey='1cat:'+p.cat;
+    if(!matchKey&&filters.status.size>0&&filters.status.has(p.status))matchKey='2status:'+p.status;
+    if(!matchKey&&filters.loc.size>0&&filters.loc.has(p.loc))matchKey='3loc:'+p.loc;
+    if(!matchKey&&filters.theme.size>0){
+      const mt=(p.themes||[]).find(t=>filters.theme.has(t));
+      if(mt)matchKey='4theme:'+mt;
     }
 
     const isMatch=matchKey&&yrOk&&qOk;
@@ -730,11 +770,23 @@ function renderCard(p){
   card.className='pcard';card.dataset.id=p.id;
   card.style.left=p.x+'px';card.style.top=p.y+'px';
   const imgSrc=gdrive(drawingMode?p.drawing:p.img);
+  const themes=(p.themes||[]).slice(0,6);
+  let flagsHTML='';
+  if(themes.length){
+    let polys='';
+    themes.forEach((t,i)=>{
+      const angle=Math.round(i*45);
+      polys+=`<g transform="rotate(${angle},14,14)"><polygon points="14,3 22,19 6,19" fill="${getThemeColor(t)}" opacity="0.7"/></g>`;
+    });
+    flagsHTML=`<svg class="theme-flags-svg" width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">${polys}</svg>`;
+  }
+
   card.innerHTML=`
     <div class="card-img" id="ci-${p.id}">
       ${imgSrc?`<img src="${imgSrc}" alt="">`:`<div class="ph"></div>`}
       <div class="card-band"><div class="card-name">${p.name}</div></div>
     </div>
+    <div class="theme-flags">${flagsHTML}</div>
     <div class="card-border"></div>`;
   makeDraggable(card,p);
   document.getElementById('canvas').appendChild(card);
