@@ -15,7 +15,7 @@
   --sidebar:220px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;background:var(--black);color:var(--white)}
+html,body{height:100%;overflow:hidden;overflow-x:hidden;font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;background:var(--black);color:var(--white)}
 
 /* TOPBAR */
 .topbar{height:50px;background:var(--black);border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;padding:0 0 0 20px;position:relative;z-index:200;flex-shrink:0}
@@ -55,14 +55,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 .clear-btn:hover{border-color:var(--mustard);color:var(--mustard)}
 
 /* MAIN AREA */
-.main{flex:1;overflow:hidden;position:relative}
+.main{flex:1;overflow:hidden;overflow-x:hidden;position:relative}
 
 /* CANVAS */
-#view-canvas{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;display:block}
+#view-canvas{position:absolute;inset:0;overflow-x:hidden!important;overflow-y:auto;display:block}
 .canvas-inner{
   position:relative;
   width:100%;
+  max-width:100%;
   min-height:100%;
+  overflow-x:hidden;
   background-color:var(--black);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
   background-size:40px 40px;
