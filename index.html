@@ -57,7 +57,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 .main{flex:1;overflow:hidden;overflow-x:hidden;position:relative}
 
 /* CANVAS */
-#view-canvas{position:absolute;inset:0;overflow-x:hidden!important;overflow-y:auto;display:block}
+#view-canvas{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;display:block}
 .canvas-inner{
   position:relative;
   width:100%;
@@ -67,7 +67,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
   background-color:var(--black);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
   background-size:40px 40px;
-  padding:2px;
+  padding:4px 16px 4px 4px;
 }
 
 /* PROJECT CARD */
@@ -138,17 +138,28 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 }
 
 .ccard{
-  width:150px;
-  border:1px solid var(--mustard);
+  width:150px;height:150px;
+  box-shadow:0 0 0 1px var(--mustard);
   cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  flex-shrink:0;
 }
-.ccard .cc-band{background:var(--mustard);padding:7px 9px 6px}
-.ccard .cc-name{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-weight:900;font-size:13px;color:var(--black);text-transform:uppercase;line-height:1.05}
-.ccard .cc-sub{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:9px;color:rgba(0,0,0,0.55);margin-top:2px}
-.ccard .cc-img{width:100%;height:100px;background:#1a1a1a;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
-.ccard .cc-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ccard:hover .cc-band{opacity:1}
+.ccard .cc-band{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(245,197,24,0.92);
+  padding:7px 9px 6px;
+  opacity:0;
+  transition:opacity 0.25s ease;
+  z-index:2;
+}
+.ccard .cc-name{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-weight:700;font-size:11px;color:var(--black);line-height:1.15}
+.ccard .cc-sub{display:none}
+.ccard .cc-img{position:absolute;inset:0;width:100%;height:100%;background:#1a1a1a;display:flex;align-items:center;justify-content:center}
+.ccard .cc-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
 .ccard .cc-img .ph{opacity:0.15}
-.ccard .cc-foot{padding:4px 9px 5px;background:var(--black);font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:8px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.3)}
+.ccard .cc-foot{display:none}
 
 /* PEOPLE */
 #view-people{position:absolute;inset:0;overflow:auto;display:none;padding:40px}
@@ -240,7 +251,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
   .card-name{font-size:14px}
   .card-img{width:160px;height:160px;aspect-ratio:1/1}
   .ccard{width:130px}
-  .ccard .cc-img{height:80px}
+  .ccard{width:120px;height:120px}
   .people-grid{gap:12px;padding:20px}
   .person-avatar{width:120px;height:120px;font-size:28px}
   .person-card{width:120px}
@@ -684,17 +695,13 @@ function renderChrono(){
       card.style.cssText=`position:relative;transform:none;width:${CARD_W}px;`;
       const imgSrc=gdrive(drawingMode?(p.drawing||p.img):p.img);
       card.innerHTML=`
-        <div class="cc-band">
-          <div class="cc-name">${p.name}</div>
-          <div class="cc-sub">${p.city||p.loc||''}</div>
-        </div>
         <div class="cc-img">
           ${imgSrc
             ?`<img src="${imgSrc}" alt="">`
             :`<div class="ph"><svg width="30" height="22" viewBox="0 0 30 22" fill="none"><rect x="1" y="4" width="28" height="16" stroke="white" stroke-width="1"/><polyline points="1,4 15,1 29,4" stroke="white" stroke-width="1"/></svg></div>`
           }
         </div>
-        <div class="cc-foot">${p.cat||''}${p.cat&&p.status?' · ':''}${p.status||''}</div>`;
+        <div class="cc-band"><div class="cc-name">${p.name}</div></div>`;
       card.onclick=()=>openModal(p.id);
       grid.appendChild(card);
     });
