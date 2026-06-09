@@ -495,7 +495,7 @@ window.peopleData=[];
 let drawingMode=false;
 
 let filters={cat:new Set(),status:new Set(),loc:new Set()};
-const CW=210,GAP=24,COLS=9,SX=40,SY=40;
+const CW=210,GAP=24,COLS=9,SX=40,SY=40,SX_ORIG=40,SY_ORIG=40;
 
 function gdrive(url){
   if(!url)return null;
@@ -553,7 +553,7 @@ function applyFilters(){
 
   const canvas=document.getElementById('canvas');
   const canvasW=canvas.offsetWidth||window.innerWidth-220;
-  const CARD=210,GAP=24,SX=10;
+  const CARD=210,GAP=24,SX=SX_ORIG,TOP=SY_ORIG;
   const cols=Math.max(1,Math.floor((canvasW-SX)/(CARD+GAP)));
 
   // Categorise each project
@@ -600,7 +600,7 @@ function applyFilters(){
     const col=i%cols;
     const row=Math.floor(i/cols);
     const nx=SX+col*(CARD+GAP);
-    const ny=10+row*(CARD+GAP);
+    const ny=TOP+row*(CARD+GAP);
     card.style.left=nx+'px';
     card.style.top=ny+'px';
     card.classList.remove('dimmed');
@@ -608,7 +608,7 @@ function applyFilters(){
 
   // Position unmatched cards below matched rows
   const matchedRows=Math.ceil(matched.length/cols)||0;
-  const unmatchedStartY=10+matchedRows*(CARD+GAP)+(matched.length?GAP*2:0);
+  const unmatchedStartY=TOP+matchedRows*(CARD+GAP)+(matched.length?GAP*2:0);
 
   unmatched.forEach(({card,p},i)=>{
     const col=i%cols;
