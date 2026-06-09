@@ -125,26 +125,28 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 .sd-competition{background:rgba(255,255,255,0.3)}
 
 /* CHRONOLOGY */
-#view-chrono{position:absolute;inset:0;overflow:auto;display:none;padding:0}
+#view-chrono{position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;display:none;padding:0}
 .chrono-inner{
-  min-width:3200px;height:100%;
+  min-width:3200px;
+  height:100%;
+  max-height:100%;
   background-color:var(--black);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
   background-size:40px 40px;
   padding:60px 60px 40px;
   position:relative;
+  overflow-y:hidden;
 }
 .chrono-axis{position:absolute;top:140px;left:60px;right:60px;height:1px;background:rgba(255,255,255,0.15)}
 .chrono-years{position:absolute;top:60px;left:60px;right:60px;display:flex;justify-content:space-between}
 .chrono-year-mark{display:flex;flex-direction:column;align-items:center;gap:6px}
 .cym-line{width:1px;height:60px;background:rgba(255,255,255,0.1)}
-.cym-label{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;color:rgba(255,255,255,0.3);text-transform:uppercase}
+.cym-label{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-size:25px;font-weight:700;letter-spacing:0.04em;color:rgba(255,255,255,0.4)}
 .chrono-cards{position:absolute;top:160px;left:60px;right:60px}
 .ccard{
-  position:absolute;width:160px;
+  width:150px;
   border:1px solid var(--mustard);
   cursor:pointer;
-  transform:translateX(-50%);
 }
 .ccard .cc-band{background:var(--mustard);padding:7px 9px 6px}
 .ccard .cc-name{font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;font-weight:900;font-size:13px;color:var(--black);text-transform:uppercase;line-height:1.05}
@@ -614,44 +616,100 @@ function closeModal(){document.getElementById('modal-overlay').classList.remove(
 function renderChrono(){
   const ci=document.getElementById('chrono-inner');
   ci.innerHTML='';
-  const YEARS=[];for(let y=2008;y<=2025;y++)YEARS.push(y);
-  const W=3800-120,perYear=W/17;
-  // axis
-  const axis=document.createElement('div');axis.className='chrono-axis';ci.appendChild(axis);
-  // year marks
-  const yw=document.createElement('div');yw.className='chrono-years';
-  YEARS.forEach(y=>{
-    const m=document.createElement('div');m.className='chrono-year-mark';
-    m.innerHTML=`<div class="cym-line"></div><div class="cym-label">${y}</div>`;
-    yw.appendChild(m);
-  });
-  ci.appendChild(yw);
-  // cards — stack by year
+
+  // Group projects by year, only years that have projects
   const byYear={};
-  projects.forEach(p=>{if(p.year){const y=+p.year;if(!byYear[y])byYear[y]=[];byYear[y].push(p);}});
-  Object.entries(byYear).forEach(([yr,ps])=>{
-    const xPct=(+yr-2008)/17;
-    const xPx=60+xPct*W;
-    ps.forEach((p,i)=>{
+  projects.forEach(p=>{
+    if(p.year){
+      const y=+p.year;
+      if(!byYear[y])byYear[y]=[];
+      byYear[y].push(p);
+    }
+  });
+
+  const years=Object.keys(byYear).map(Number).sort((a,b)=>a-b);
+  if(!years.length)return;
+
+  // Card dimensions
+  const CARD_W=150;
+  const CARD_H=180;
+  const CARD_GAP=10;
+  const COLS=2; // max 2 cards per row per year
+  const YEAR_PADDING=32; // padding left+right per year block
+  const YEAR_GAP=24; // gap between year blocks
+  const TOP_OFFSET=90; // space for year label at top
+
+  // Build year blocks
+  const wrapper=document.createElement('div');
+  wrapper.style.cssText='display:flex;align-items:flex-start;height:100%;padding:20px 40px;gap:'+YEAR_GAP+'px;';
+  ci.appendChild(wrapper);
+
+  years.forEach(yr=>{
+    const ps=byYear[yr];
+    const rows=Math.ceil(ps.length/COLS);
+    const blockW=COLS*(CARD_W+CARD_GAP)-CARD_GAP+(YEAR_PADDING*2);
+
+    const block=document.createElement('div');
+    block.style.cssText=`
+      flex-shrink:0;
+      width:${blockW}px;
+      display:flex;
+      flex-direction:column;
+      gap:${CARD_GAP}px;
+    `;
+
+    // Year label
+    const label=document.createElement('div');
+    label.style.cssText=`
+      font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;
+      font-size:25px;
+      font-weight:700;
+      color:#F5C518;
+      letter-spacing:0.04em;
+      padding:0 ${YEAR_PADDING}px;
+      margin-bottom:12px;
+      flex-shrink:0;
+    `;
+    label.textContent=yr;
+    block.appendChild(label);
+
+    // Divider line
+    const line=document.createElement('div');
+    line.style.cssText=`height:1px;background:rgba(255,255,255,0.1);margin:0 ${YEAR_PADDING}px ${CARD_GAP}px;flex-shrink:0;`;
+    block.appendChild(line);
+
+    // Card grid
+    const grid=document.createElement('div');
+    grid.style.cssText=`
+      display:grid;
+      grid-template-columns:repeat(${Math.min(COLS,ps.length)},${CARD_W}px);
+      gap:${CARD_GAP}px;
+      padding:0 ${YEAR_PADDING}px;
+    `;
+
+    ps.forEach(p=>{
       const card=document.createElement('div');
       card.className='ccard';
-      card.style.left=xPx+'px';
-      card.style.top=(i*180+20)+'px';
+      card.style.cssText=`position:relative;transform:none;width:${CARD_W}px;`;
       const imgSrc=gdrive(p.img);
       card.innerHTML=`
-        <div class="cc-band"><div class="cc-name">${p.name}</div><div class="cc-sub">${p.city||p.loc||''}</div></div>
-        <div class="cc-img">${imgSrc?`<img src="${imgSrc}" alt="">`:`<div class="ph"><svg width="30" height="22" viewBox="0 0 30 22" fill="none"><rect x="1" y="4" width="28" height="16" stroke="white" stroke-width="1"/><polyline points="1,4 15,1 29,4" stroke="white" stroke-width="1"/></svg></div>`}</div>
-        <div class="cc-foot">${p.cat||''} · ${p.status||''}</div>`;
+        <div class="cc-band">
+          <div class="cc-name">${p.name}</div>
+          <div class="cc-sub">${p.city||p.loc||''}</div>
+        </div>
+        <div class="cc-img">
+          ${imgSrc
+            ?`<img src="${imgSrc}" alt="">`
+            :`<div class="ph"><svg width="30" height="22" viewBox="0 0 30 22" fill="none"><rect x="1" y="4" width="28" height="16" stroke="white" stroke-width="1"/><polyline points="1,4 15,1 29,4" stroke="white" stroke-width="1"/></svg></div>`
+          }
+        </div>
+        <div class="cc-foot">${p.cat||''}${p.cat&&p.status?' · ':''}${p.status||''}</div>`;
       card.onclick=()=>openModal(p.id);
-      ci.appendChild(card);
-      // connector line to axis
-      const line=document.createElement('div');
-      line.className='chrono-connector';
-      line.style.left=xPx+'px';
-      line.style.top='80px';
-      line.style.height=(i*180+20-80)+'px';
-      if(i===0)ci.appendChild(line);
+      grid.appendChild(card);
     });
+
+    block.appendChild(grid);
+    wrapper.appendChild(block);
   });
 }
 
