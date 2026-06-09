@@ -72,15 +72,49 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
 
 /* PROJECT CARD */
 .pcard{
-  position:absolute;width:210px;
-  border:1px solid var(--mustard);
-  cursor:pointer;user-select:none;
-  display:flex;flex-direction:column;
-  transition:box-shadow 0.15s;
+  position:absolute;
+  width:210px;
+  height:210px;
+  cursor:pointer;
+  user-select:none;
+  overflow:hidden;
 }
-.pcard:hover{box-shadow:0 0 0 1px var(--mustard)}
 .pcard.dimmed{opacity:0.1;pointer-events:none}
 
+/* image layer — crops to square */
+.card-img{
+  position:absolute;
+  inset:0;
+  background:#1a1a1a;
+  overflow:hidden;
+}
+.card-img img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
+.card-img .ph{
+  position:absolute;
+  inset:0;
+  opacity:0.15;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* border layer — sits on top of image, inside pcard */
+.card-border{
+  position:absolute;
+  inset:0;
+  border:1.5px solid var(--mustard);
+  pointer-events:none;
+  z-index:10;
+}
+
+/* hover name band — above image, below border */
 .card-band{
   position:absolute;
   bottom:0;left:0;right:0;
@@ -96,29 +130,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
   font-family:'Century Gothic','CenturyGothic','AppleGothic',sans-serif;
   font-weight:700;font-size:14px;
   color:var(--black);
-  line-height:1.15;letter-spacing:0.01em;
+  line-height:1.15;
 }
 .card-sub{display:none}
-
-.card-img{
-  width:207px !important;
-  height:207px !important;
-  background:#1a1a1a;
-  overflow:hidden;
-  position:relative;
-  display:block;
-}
-
-.card-img img{
-  position:absolute;
-  inset:0;
-  width:100% !important;
-  height:100% !important;
-  object-fit:cover;
-  object-position:center;
-  display:block;
-}
-.card-img .ph{opacity:0.15;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
 
 .card-cat{display:none}
 .cat-label{display:none}
@@ -531,10 +545,9 @@ function renderCard(p){
   card.innerHTML=`
     <div class="card-img" id="ci-${p.id}">
       ${imgSrc?`<img src="${imgSrc}" alt="">`:`<div class="ph"><svg width="40" height="30" viewBox="0 0 40 30" fill="none"><rect x="1" y="6" width="38" height="22" stroke="white" stroke-width="1"/><polyline points="1,6 20,1 39,6" stroke="white" stroke-width="1"/></svg></div>`}
-      <div class="card-band">
-        <div class="card-name">${p.name}</div>
-      </div>
-    </div>`;
+      <div class="card-band"><div class="card-name">${p.name}</div></div>
+    </div>
+    <div class="card-border"></div>`;
   makeDraggable(card,p);
   document.getElementById('canvas').appendChild(card);
   setTimeout(expandCanvas,50);
