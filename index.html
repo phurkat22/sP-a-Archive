@@ -731,10 +731,15 @@ function updateCounts(){
   const tf=document.getElementById('theme-filters');
   if(tf){
     const sorted=Object.entries(themeCounts).sort((a,b)=>b[1]-a[1]);
-    tf.innerHTML=sorted.map(([t,cnt])=>{
+    tf.innerHTML='';
+    sorted.forEach(([t,cnt])=>{
       const isOn=filters.theme.has(t);
-      return`<div class="sb-item${isOn?' on':''}" onclick="toggleFilter('theme','${t.replace(/'/g,"\'")}',this)"><span>${t}</span><span class="sb-count">${cnt}</span></div>`;
-    }).join('');
+      const div=document.createElement('div');
+      div.className='sb-item'+(isOn?' on':'');
+      div.innerHTML='<span>'+t+'</span><span class="sb-count">'+cnt+'</span>';
+      div.addEventListener('click',function(){toggleFilter('theme',t,this);});
+      tf.appendChild(div);
+    });
   }
 
   // Build location filters dynamically
