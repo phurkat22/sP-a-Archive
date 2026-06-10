@@ -1017,6 +1017,7 @@ async function loadFromSheet(){
   try{
     const base=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
     const projRes=await fetch(base+'&sheet=Projects');
+    console.log('Sheet fetch status:',projRes.status,projRes.ok);
     if(!projRes.ok)throw new Error('not public');
     const projText=await projRes.text();
     const projRows=parseCSV(projText);
@@ -1024,6 +1025,8 @@ async function loadFromSheet(){
     projects=[];
     document.getElementById('canvas').innerHTML='';
     const headers=projRows[0].map(h=>h.replace(/"/g,'').trim().toLowerCase().replace(/[^a-z0-9]/g,''));
+    console.log('Headers found:',headers);
+    console.log('Row count:',projRows.length);
     projRows.slice(1).forEach((row,i)=>{
       const get=(name)=>{const idx=headers.indexOf(name);return idx>=0?(row[idx]||'').replace(/^"|"$/g,'').trim():'';};
       const p={
@@ -1055,18 +1058,27 @@ async function loadFromSheet(){
 }
 
 function parseCSV(text){
-  const rows=[];const lines=text.split('\n');
-  for(const line of lines){
-    if(!line.trim())continue;
-    const row=[];let cur='';let inQ=false;
-    for(let i=0;i<line.length;i++){
-      const ch=line[i];
-      if(ch==='"'&&(i===0||line[i-1]===',')){inQ=true;}
-      else if(ch==='"'&&inQ&&(i===line.length-1||line[i+1]===',')){inQ=false;}
-      else if(ch===','&&!inQ){row.push(cur.trim());cur='';}
-      else cur+=ch;
+  const rows=[];
+  let i=0;
+  while(i<text.length){
+    const row=[];
+    while(i<text.length&&text[i]!=='\n'){
+      let val='';
+      if(text[i]==='"'){
+        i++; // skip opening quote
+        while(i<text.length){
+          if(text[i]==='"'&&text[i+1]==='"'){val+='"';i+=2;} // escaped quote
+          else if(text[i]==='"'){i++;break;} // closing quote
+          else{val+=text[i];i++;}
+        }
+      } else {
+        while(i<text.length&&text[i]!==','&&text[i]!=='\n'){val+=text[i];i++;}
+      }
+      row.push(val.trim());
+      if(i<text.length&&text[i]===',')i++; // skip comma
     }
-    row.push(cur.trim());rows.push(row);
+    if(i<text.length&&text[i]==='\n')i++; // skip newline
+    if(row.length>1||row[0])rows.push(row);
   }
   return rows;
 }
