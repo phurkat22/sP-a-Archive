@@ -331,7 +331,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
   width:0;height:0;
   border-style:solid;
   border-width:0 20px 20px 0;
-  border-color:transparent rgba(0,0,0,0.5) transparent transparent;
+  border-color:transparent rgba(255,255,255,0.75) transparent transparent;
 }
 </style>
 </head>
@@ -761,8 +761,7 @@ function renderCard(p){
       ${imgSrc?`<img src="${imgSrc}" alt="">`:`<div class="ph"></div>`}
       <div class="card-band"><div class="card-name">${p.name}</div></div>
     </div>
-    ${(p.themes&&p.themes.length)?'<div class="theme-flags"><div class="theme-corner"></div></div>':''}
-    <div class="card-border"></div>`;
+    ${(p.themes&&p.themes.length)?'<div class="theme-flags"><div class="theme-corner"></div></div>':''}`;
   makeDraggable(card,p);
   document.getElementById('canvas').appendChild(card);
   setTimeout(expandCanvas,50);
