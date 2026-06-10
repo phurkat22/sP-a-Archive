@@ -1021,6 +1021,7 @@ async function loadFromSheet(){
     if(!projRes.ok)throw new Error('not public');
     const projText=await projRes.text();
     const projRows=parseCSV(projText);
+    console.log('Parsed rows:',projRows.length,'First row:',projRows[0]);
     if(projRows.length<2)throw new Error('no data');
     projects=[];
     document.getElementById('canvas').innerHTML='';
@@ -1052,7 +1053,8 @@ async function loadFromSheet(){
     const st=document.getElementById('sheet-status');
     if(st){st.textContent='● live from sheets';st.style.color='rgba(0,0,0,0.3)';}
   }catch(e){
-    console.warn('Sheet not accessible, loading demo:',e);
+    console.warn('Sheet not accessible:',e.message,e);
+    console.log('Error type:',e.constructor.name);
     loadDemo();
   }
 }
