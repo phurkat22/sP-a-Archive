@@ -761,7 +761,7 @@ function renderCard(p){
       ${imgSrc?`<img src="${imgSrc}" alt="">`:`<div class="ph"></div>`}
       <div class="card-band"><div class="card-name">${p.name}</div></div>
     </div>
-    ${themes.length?'<div class="theme-flags"><div class="theme-corner"></div></div>':''}
+    ${(p.themes&&p.themes.length)?'<div class="theme-flags"><div class="theme-corner"></div></div>':''}
     <div class="card-border"></div>`;
   makeDraggable(card,p);
   document.getElementById('canvas').appendChild(card);
